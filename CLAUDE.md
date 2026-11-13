@@ -1,5 +1,13 @@
 # CLAUDE.md — Calculs RDM « coin de table »
 
+## À lire en premier (début de chaque session)
+
+**Avant toute action dans une nouvelle conversation, lis [docs/AVANCEMENT.md](docs/AVANCEMENT.md).** Il décrit l'état du projet : étapes terminées, décisions d'architecture (types, API des sections, conventions d'axes, règles des matériaux), limites connues et TODO. Ne refais pas un choix qui y est déjà tranché sans me le demander.
+
+Particularités du poste de développement (Windows), détaillées dans ce document :
+- lancer `npm test` depuis un chemin `C:\…` (lettre de lecteur en majuscule), sinon Vitest échoue ;
+- pousser avec `git -c http.sslBackend=schannel push`.
+
 ## Objectif du projet
 
 Application web de **pré-dimensionnement en résistance des matériaux** : les calculs analytiques rapides qu'un ingénieur fait à la main avant une simulation éléments finis.
@@ -180,5 +188,6 @@ Le dépôt GitHub est **public** : tout ce qui est poussé (code, historique com
 - **Un module à la fois.** Proposer un plan avant de coder, puis : core → tests → UI.
 - Petits commits atomiques avec un message clair en français.
 - Après chaque module, me résumer : formules implémentées, sources, cas testés, limites connues.
+- Après chaque module (ou décision importante), **mettre à jour [docs/AVANCEMENT.md](docs/AVANCEMENT.md)** : ce qui est fait, décisions, limites, TODO. Le commiter avec le module.
 - Si une demande est ambiguë (convention, hypothèse, norme), **pose la question** plutôt que de supposer.
 - Ne jamais supprimer ou affaiblir un test pour le faire passer.
