@@ -13,6 +13,8 @@ interface UnitInputProps<Q extends Quantity> {
   initialSI?: number | undefined;
   /** Reçoit la valeur en SI : `undefined` si vide, `NaN` si la saisie est invalide. */
   onChange: (valueSI: number | undefined) => void;
+  /** Appelé quand le champ perd le focus. */
+  onBlur?: (() => void) | undefined;
   /** Erreur de validation venant du parent (ex. schéma Zod). */
   error?: string | undefined;
   required?: boolean;
@@ -30,6 +32,7 @@ export function UnitInput<Q extends Quantity>({
   defaultUnit,
   initialSI,
   onChange,
+  onBlur,
   error,
   required,
 }: UnitInputProps<Q>) {
@@ -39,7 +42,10 @@ export function UnitInput<Q extends Quantity>({
   );
 
   const parsed = parseDecimal(text);
-  const localError = parsed !== undefined && Number.isNaN(parsed) ? 'Nombre invalide.' : undefined;
+  // « Nombre invalide » n'apparaît qu'après la sortie du champ (pas pendant la frappe).
+  const [blurred, setBlurred] = useState(false);
+  const localError =
+    blurred && parsed !== undefined && Number.isNaN(parsed) ? 'Nombre invalide.' : undefined;
 
   const handleText = (next: string) => {
     setText(next);
@@ -61,6 +67,10 @@ export function UnitInput<Q extends Quantity>({
       {...(required !== undefined && { required })}
       text={text}
       onTextChange={handleText}
+      onBlur={() => {
+        setBlurred(true);
+        onBlur?.();
+      }}
       error={localError ?? error}
       adornment={
         <UnitSelect
@@ -81,6 +91,7 @@ interface NumberInputProps {
   unitLabel?: string;
   initial?: number | undefined;
   onChange: (value: number | undefined) => void;
+  onBlur?: (() => void) | undefined;
   error?: string | undefined;
   required?: boolean;
 }
@@ -92,12 +103,16 @@ export function NumberInput({
   unitLabel,
   initial,
   onChange,
+  onBlur,
   error,
   required,
 }: NumberInputProps) {
   const [text, setText] = useState(() => (initial === undefined ? '' : formatInput(initial)));
   const parsed = parseDecimal(text);
-  const localError = parsed !== undefined && Number.isNaN(parsed) ? 'Nombre invalide.' : undefined;
+  // « Nombre invalide » n'apparaît qu'après la sortie du champ (pas pendant la frappe).
+  const [blurred, setBlurred] = useState(false);
+  const localError =
+    blurred && parsed !== undefined && Number.isNaN(parsed) ? 'Nombre invalide.' : undefined;
 
   return (
     <DecimalField
@@ -108,6 +123,10 @@ export function NumberInput({
       onTextChange={(next) => {
         setText(next);
         onChange(parseDecimal(next));
+      }}
+      onBlur={() => {
+        setBlurred(true);
+        onBlur?.();
       }}
       error={localError ?? error}
       adornment={

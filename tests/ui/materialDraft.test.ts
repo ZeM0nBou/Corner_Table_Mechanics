@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildMaterial, draftFromMaterial, emptyDraft } from '@ui/materials/materialDraft';
+import {
+  buildMaterial,
+  draftFromMaterial,
+  emptyDraft,
+  visibleErrors,
+  type DraftErrors,
+  type DraftField,
+} from '@ui/materials/materialDraft';
 import type { Material } from '@materials/schema';
 
 /** Brouillon complet avec des valeurs fictives. */
@@ -87,5 +94,39 @@ describe('draftFromMaterial', () => {
       notes: 'note',
     };
     expect(buildMaterial(draftFromMaterial(m), m.id)).toEqual({ ok: true, material: m });
+  });
+});
+
+describe('visibleErrors (contrôle à la sortie du champ)', () => {
+  const errors: DraftErrors = {
+    name: 'Le nom est obligatoire.',
+    E_Pa: 'Obligatoire.',
+    Re_Pa: 'Re doit être ≤ Rm.',
+    tMin_m: 'Renseigner les deux bornes, ou aucune.',
+  };
+  const touched = (...f: DraftField[]) => new Set<DraftField>(f);
+
+  it('aucune erreur tant qu’aucun champ n’a été quitté', () => {
+    expect(visibleErrors(errors, touched(), false)).toEqual({});
+  });
+
+  it('affiche l’erreur d’un champ quitté, et seulement celle-là', () => {
+    expect(visibleErrors(errors, touched('E_Pa'), false)).toEqual({ E_Pa: 'Obligatoire.' });
+  });
+
+  it('Re ≤ Rm : l’erreur (portée par Re) apparaît dès que Rm est quitté', () => {
+    expect(visibleErrors(errors, touched('Rm_Pa'), false)).toEqual({
+      Re_Pa: 'Re doit être ≤ Rm.',
+    });
+  });
+
+  it('bornes d’épaisseur : l’erreur apparaît dès que la borne max est quittée', () => {
+    expect(visibleErrors(errors, touched('tMax_m'), false)).toEqual({
+      tMin_m: 'Renseigner les deux bornes, ou aucune.',
+    });
+  });
+
+  it('toutes les erreurs après une tentative d’enregistrement', () => {
+    expect(visibleErrors(errors, touched(), true)).toEqual(errors);
   });
 });

@@ -5,7 +5,8 @@ import {
   buildMaterial,
   draftFromMaterial,
   emptyDraft,
-  type DraftErrors,
+  visibleErrors,
+  type DraftField,
   type MaterialDraft,
 } from './materialDraft';
 
@@ -15,6 +16,8 @@ interface MaterialFormProps {
   initial?: Material | undefined;
   /** Identifiant du matériau enregistré. */
   id: string;
+  /** Familles existantes, proposées à la saisie. */
+  familySuggestions: readonly string[];
   onSave: (m: Material) => void;
   onCancel: () => void;
 }
@@ -23,20 +26,26 @@ function TextField({
   label,
   value,
   onChange,
+  onBlur,
   error,
   required = false,
   multiline = false,
   placeholder,
+  suggestions,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  onBlur?: () => void;
   error?: string | undefined;
   required?: boolean;
   multiline?: boolean;
   placeholder?: string;
+  /** Valeurs proposées (liste de suggestions du navigateur, saisie libre conservée). */
+  suggestions?: readonly string[];
 }) {
   const id = useId();
+  const listId = `${id}-suggestions`;
   const cls = `w-full rounded-md border bg-white px-2.5 py-1.5 focus:outline-none focus:ring-2 ${
     error !== undefined
       ? 'border-red-500 focus:ring-red-500/30'
@@ -46,6 +55,7 @@ function TextField({
     id,
     value,
     placeholder,
+    onBlur,
     'aria-invalid': error !== undefined,
     'aria-describedby': error !== undefined ? `${id}-erreur` : undefined,
     className: cls,
@@ -59,7 +69,20 @@ function TextField({
       {multiline ? (
         <textarea rows={3} {...common} onChange={(e) => onChange(e.target.value)} />
       ) : (
-        <input type="text" {...common} onChange={(e) => onChange(e.target.value)} />
+        <input
+          type="text"
+          {...common}
+          list={suggestions ? listId : undefined}
+          autoComplete="off"
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+      {suggestions && (
+        <datalist id={listId}>
+          {suggestions.map((s) => (
+            <option key={s} value={s} />
+          ))}
+        </datalist>
       )}
       {error !== undefined && (
         <p id={`${id}-erreur`} className="text-xs text-red-700">
@@ -79,11 +102,23 @@ function Fieldset({ legend, children }: { legend: string; children: ReactNode })
   );
 }
 
-/** Formulaire de création ou de modification d'un matériau personnalisé. */
-export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialFormProps) {
+/**
+ * Formulaire de création ou de modification d'un matériau personnalisé.
+ * Chaque champ est contrôlé dès qu'on le quitte (y compris les contrôles croisés
+ * comme Re ≤ Rm) ; « Enregistrer » affiche toutes les erreurs restantes.
+ */
+export function MaterialForm({
+  title,
+  initial,
+  id,
+  familySuggestions,
+  onSave,
+  onCancel,
+}: MaterialFormProps) {
   const [draft, setDraft] = useState<MaterialDraft>(() =>
     initial ? draftFromMaterial(initial) : emptyDraft(),
   );
+  const [touched, setTouched] = useState<ReadonlySet<DraftField>>(new Set());
   const [submitted, setSubmitted] = useState(false);
 
   const set =
@@ -92,8 +127,13 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
       setDraft((d) => ({ ...d, [key]: value }));
 
   const result = buildMaterial(draft, id);
-  // Erreurs affichées après une première tentative d'enregistrement, puis mises à jour en direct.
-  const errors: DraftErrors = submitted && !result.ok ? result.errors : {};
+  const errors = visibleErrors(result.ok ? {} : result.errors, touched, submitted);
+
+  /** Props communes à un champ : marquage « quitté » et erreur à afficher. */
+  const field = (key: DraftField) => ({
+    onBlur: () => setTouched((prev) => (prev.has(key) ? prev : new Set(prev).add(key))),
+    error: errors[key],
+  });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -115,7 +155,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           required
           value={draft.name}
           onChange={set('name')}
-          error={errors.name}
+          {...field('name')}
           placeholder="ex. S355 — fiche fournisseur"
         />
         <TextField
@@ -123,20 +163,21 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           required
           value={draft.family}
           onChange={set('family')}
-          error={errors.family}
-          placeholder="ex. acier de construction"
+          {...field('family')}
+          suggestions={familySuggestions}
+          placeholder="Choisir ou saisir une famille"
         />
         <TextField
           label="Norme"
           value={draft.standard}
           onChange={set('standard')}
-          error={errors.standard}
+          {...field('standard')}
         />
         <TextField
           label="État / traitement"
           value={draft.condition}
           onChange={set('condition')}
-          error={errors.condition}
+          {...field('condition')}
         />
       </Fieldset>
 
@@ -149,7 +190,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           defaultUnit="GPa"
           initialSI={initial?.E_Pa}
           onChange={set('E_Pa')}
-          error={errors.E_Pa}
+          {...field('E_Pa')}
         />
         <NumberInput
           label="Coefficient de Poisson"
@@ -157,7 +198,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           required
           initial={initial?.nu}
           onChange={set('nu')}
-          error={errors.nu}
+          {...field('nu')}
         />
         <UnitInput
           label="Masse volumique"
@@ -167,7 +208,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           defaultUnit="kg/m³"
           initialSI={initial?.rho_kg_m3}
           onChange={set('rho_kg_m3')}
-          error={errors.rho_kg_m3}
+          {...field('rho_kg_m3')}
         />
         <UnitInput
           label="Dilatation thermique"
@@ -176,7 +217,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           defaultUnit="10⁻⁶/K"
           initialSI={initial?.alpha_1_K}
           onChange={set('alpha_1_K')}
-          error={errors.alpha_1_K}
+          {...field('alpha_1_K')}
         />
       </Fieldset>
 
@@ -188,7 +229,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           defaultUnit="MPa"
           initialSI={initial?.Re_Pa}
           onChange={set('Re_Pa')}
-          error={errors.Re_Pa}
+          {...field('Re_Pa')}
         />
         <UnitInput
           label="Résistance à la rupture"
@@ -197,7 +238,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           defaultUnit="MPa"
           initialSI={initial?.Rm_Pa}
           onChange={set('Rm_Pa')}
-          error={errors.Rm_Pa}
+          {...field('Rm_Pa')}
         />
         <NumberInput
           label="Allongement à rupture"
@@ -205,7 +246,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           unitLabel="%"
           initial={initial?.A_percent}
           onChange={set('A_percent')}
-          error={errors.A_percent}
+          {...field('A_percent')}
         />
       </Fieldset>
 
@@ -216,7 +257,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           defaultUnit="mm"
           initialSI={initial?.thicknessRange_m?.[0]}
           onChange={set('tMin_m')}
-          error={errors.tMin_m}
+          {...field('tMin_m')}
         />
         <UnitInput
           label="Épaisseur max."
@@ -224,7 +265,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
           defaultUnit="mm"
           initialSI={initial?.thicknessRange_m?.[1]}
           onChange={set('tMax_m')}
-          error={errors.tMax_m}
+          {...field('tMax_m')}
         />
       </Fieldset>
 
@@ -235,7 +276,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
             required
             value={draft.source}
             onChange={set('source')}
-            error={errors.source}
+            {...field('source')}
             placeholder="ex. fiche technique fournisseur X, rév. 2025 ; essai interne n° …"
           />
         </div>
@@ -245,7 +286,7 @@ export function MaterialForm({ title, initial, id, onSave, onCancel }: MaterialF
             multiline
             value={draft.notes}
             onChange={set('notes')}
-            error={errors.notes}
+            {...field('notes')}
           />
         </div>
         <label className="flex items-start gap-2 text-sm sm:col-span-2">

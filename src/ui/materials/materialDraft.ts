@@ -81,6 +81,32 @@ function fieldOf(path: readonly PropertyKey[]): DraftField {
   return 'name';
 }
 
+/** Champs liés par un contrôle croisé (Re ≤ Rm, bornes d'épaisseur). */
+const LINKED: Partial<Record<DraftField, readonly DraftField[]>> = {
+  Re_Pa: ['Rm_Pa'],
+  Rm_Pa: ['Re_Pa'],
+  tMin_m: ['tMax_m'],
+  tMax_m: ['tMin_m'],
+};
+
+/**
+ * Erreurs à afficher : celles des champs déjà quittés (ou d'un champ lié déjà quitté),
+ * ou toutes après une tentative d'enregistrement.
+ */
+export function visibleErrors(
+  errors: DraftErrors,
+  touched: ReadonlySet<DraftField>,
+  submitted: boolean,
+): DraftErrors {
+  if (submitted) return errors;
+  const visible: DraftErrors = {};
+  for (const [field, message] of Object.entries(errors) as [DraftField, string][]) {
+    const linked = LINKED[field] ?? [];
+    if (touched.has(field) || linked.some((f) => touched.has(f))) visible[field] = message;
+  }
+  return visible;
+}
+
 export type BuildResult = { ok: true; material: Material } | { ok: false; errors: DraftErrors };
 
 /** Construit et valide un matériau à partir du brouillon. */

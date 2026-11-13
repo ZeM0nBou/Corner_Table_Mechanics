@@ -6,6 +6,8 @@ interface DecimalFieldProps {
   symbol?: string;
   text: string;
   onTextChange: (text: string) => void;
+  /** Appelé quand le champ perd le focus (déclenche l'affichage des erreurs). */
+  onBlur?: (() => void) | undefined;
   /** Message d'erreur à afficher sous le champ. */
   error?: string | undefined;
   required?: boolean;
@@ -19,6 +21,7 @@ export function DecimalField({
   symbol,
   text,
   onTextChange,
+  onBlur,
   error,
   required = false,
   adornment,
@@ -40,6 +43,7 @@ export function DecimalField({
           autoComplete="off"
           value={text}
           onChange={(e) => onTextChange(e.target.value)}
+          onBlur={onBlur}
           aria-invalid={error !== undefined}
           aria-describedby={error !== undefined ? errorId : undefined}
           className={`w-full min-w-0 rounded-md border bg-white px-2.5 py-1.5 font-mono tabular-nums focus:outline-none focus:ring-2 ${
