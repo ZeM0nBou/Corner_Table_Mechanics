@@ -8,6 +8,8 @@ interface MaterialPickerProps {
   value: string;
   onChange: (id: string) => void;
   label?: string;
+  /** Hauteur maximale de la liste (classe Tailwind). */
+  listMaxHeightClass?: string;
 }
 
 /**
@@ -21,6 +23,7 @@ export function MaterialPicker({
   value,
   onChange,
   label = 'Matériau',
+  listMaxHeightClass = 'max-h-[28rem]',
 }: MaterialPickerProps) {
   const baseId = useId();
   const [query, setQuery] = useState('');
@@ -72,7 +75,9 @@ export function MaterialPicker({
         </div>
       )}
 
-      <div className="max-h-[28rem] overflow-y-auto rounded-md border border-slate-200 bg-white">
+      <div
+        className={`${listMaxHeightClass} overflow-y-auto rounded-md border border-slate-200 bg-white`}
+      >
         {groups.length === 0 && (
           <p className="px-3 py-4 text-sm text-slate-500">Aucun matériau ne correspond.</p>
         )}
