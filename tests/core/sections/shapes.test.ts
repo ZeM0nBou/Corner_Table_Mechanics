@@ -10,6 +10,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   computeSection,
+  linearMass_kg_m,
   SectionGeometryError,
   torsionConstantRectangle,
   type SectionInput,
@@ -207,5 +208,16 @@ describe('géométries impossibles → erreur claire', () => {
   ])('%s', (_label, input, message) => {
     expect(() => computeSection(input)).toThrow(SectionGeometryError);
     expect(() => computeSection(input)).toThrow(message);
+  });
+});
+
+describe('masse linéique', () => {
+  it('m = ρ A : plat 100 × 10 mm en acier (7850 kg/m³) = 7,85 kg/m', () => {
+    expectRelClose(linearMass_kg_m(1e-3, 7850), 7.85);
+  });
+
+  it('refuse une aire ou une masse volumique nulle', () => {
+    expect(() => linearMass_kg_m(0, 7850)).toThrow(SectionGeometryError);
+    expect(() => linearMass_kg_m(1e-3, -1)).toThrow(SectionGeometryError);
   });
 });

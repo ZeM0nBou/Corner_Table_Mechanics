@@ -168,6 +168,17 @@ function fromRects(
 
 const r = (y0: number, y1: number, z0: number, z1: number): Rect => ({ y0, y1, z0, z1 });
 
+/**
+ * Masse linéique d'une barre de section constante.
+ * Formule : m' = ρ · A (kg/m). Hypothèse : matériau homogène.
+ * @throws SectionGeometryError si A ou ρ n'est pas strictement positif.
+ */
+export function linearMass_kg_m(A_m2: number, rho_kg_m3: number): number {
+  positive('L’aire A', A_m2);
+  positive('La masse volumique ρ', rho_kg_m3);
+  return rho_kg_m3 * A_m2;
+}
+
 // --- Formes -------------------------------------------------------------------
 
 /**
