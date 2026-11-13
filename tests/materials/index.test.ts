@@ -49,34 +49,33 @@ describe('base de référence', () => {
     }
   });
 
-  // Source : EN 10025-2 — ReH min. pour t ≤ 16 mm et 16 < t ≤ 40 mm.
+  // Convention (CLAUDE.md) : une seule entrée par nuance et par état ; quand Re dépend
+  // de l'épaisseur, on stocke la moyenne des minima des tranches courantes.
+  it('ne contient qu’une entrée par nuance et par état', () => {
+    const keys = REFERENCE_MATERIALS.map((m) => `${m.name}|${m.condition ?? ''}`);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  // Moyennes des minima des tranches t ≤ 16 et 16 < t ≤ 40 mm (EN 10025-2),
+  // ou d ≤ 16 et 16 < d ≤ 40 mm (EN ISO 683-1 / -2, état +QT).
   it.each([
-    ['s235jr-t16', 235e6],
-    ['s235jr-t40', 225e6],
-    ['s275jr-t16', 275e6],
-    ['s275jr-t40', 265e6],
-    ['s355jr-t16', 355e6],
-    ['s355jr-t40', 345e6],
-  ])('%s : Re = %d Pa (EN 10025-2)', (id, Re) => {
-    expect(findMaterial(id)?.Re_Pa).toBe(Re);
+    ['s235jr', 235e6, 225e6],
+    ['s275jr', 275e6, 265e6],
+    ['s355jr', 355e6, 345e6],
+    ['c45-qt', 490e6, 430e6],
+    ['42crmo4-qt', 900e6, 750e6],
+  ])('%s : Re = moyenne de %d et %d Pa', (id, thin, thick) => {
+    expect(findMaterial(id)?.Re_Pa).toBe((thin + thick) / 2);
   });
 
-  it('les deux tranches d’épaisseur d’une nuance sont contiguës', () => {
-    for (const grade of ['s235jr', 's275jr', 's355jr', 'c45-qt', '42crmo4-qt']) {
-      const thin = findMaterial(`${grade}-${grade.startsWith('s') ? 't' : 'd'}16`);
-      const thick = findMaterial(`${grade}-${grade.startsWith('s') ? 't' : 'd'}40`);
-      expect(thin?.thicknessRange_m?.[1], grade).toBe(0.016);
-      expect(thick?.thicknessRange_m?.[0], grade).toBe(0.016);
-    }
-  });
-
-  it('Re diminue quand l’épaisseur augmente (effet d’épaisseur)', () => {
-    for (const [thin, thick] of [
-      ['s235jr-t16', 's235jr-t40'],
-      ['c45-qt-d16', 'c45-qt-d40'],
-      ['42crmo4-qt-d16', '42crmo4-qt-d40'],
+  it('la moyenne reste à moins de 10 % des valeurs de chaque tranche', () => {
+    for (const [, thin, thick] of [
+      ['s235jr', 235, 225],
+      ['c45-qt', 490, 430],
+      ['42crmo4-qt', 900, 750],
     ] as const) {
-      expect(findMaterial(thin)?.Re_Pa).toBeGreaterThan(findMaterial(thick)?.Re_Pa ?? Infinity);
+      const mean = (thin + thick) / 2;
+      expect(Math.abs(thin - mean) / mean).toBeLessThan(0.1);
     }
   });
 

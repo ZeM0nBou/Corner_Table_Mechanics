@@ -98,7 +98,8 @@ Un fichier JSON par famille dans `src/materials/data/` (`aciers.json`, `aluminiu
 ### Règles
 - **Aucune valeur sans source.** Si tu ajoutes un matériau, cite la norme ou la référence et mets `verified: false`. Seul moi passe une entrée à `true`.
 - Ne pas inventer de valeurs. En cas de doute, laisse le champ vide plutôt que d'approximer.
-- Quand une propriété dépend de l'épaisseur (aciers de construction), le préciser via `thicknessRange_m` ou plusieurs entrées.
+- **Une seule entrée par nuance et par état.** L'outil donne des ordres de grandeur : quand une propriété dépend de l'épaisseur (aciers de construction, aciers trempés-revenus, aluminiums filés…), on stocke la **moyenne** des valeurs des tranches d'épaisseur courantes, on indique le domaine couvert dans `thicknessRange_m`, et on détaille les valeurs de chaque tranche dans `notes`. Si une valeur de tranche s'écarte de plus de 10 % de la moyenne, le signaler dans `notes` et me demander.
+- `Rm_Pa` est le **minimum garanti** de la norme (moyenné entre tranches le cas échéant) ; la plage complète va dans `notes`.
 - L'UI affiche un badge « non vérifié » sur les matériaux `verified: false`.
 
 ### Matériaux personnalisés

@@ -14,6 +14,6 @@
     "alpha_1_K": 8.6e-6,
     "source": "Rp0,2, Rm, A : ASTM B265 (tôles, bandes et plaques, grade 5). E, ν, ρ, α : ASM Handbook, Vol. 2 (Properties of Titanium Alloys), valeurs typiques.",
     "verified": false,
-    "notes": "Re = Rp0,2. Les propriétés physiques sont des valeurs typiques, non garanties par ASTM B265. TODO: à vérifier — toutes les valeurs, et α (plage de température)."
+    "notes": "Re = Rp0,2. Les propriétés physiques sont des valeurs typiques, non garanties par ASTM B265. Recoupé (nov. 2026) : minima ASTM B265 état recuit 130 ksi / 120 ksi / 10 % (≈ 896 / 827 MPa) confirmés ; ρ 4,43 g/cm³ confirmé ; E varie de 110 à 120 GPa selon les sources (113,8 GPa non retrouvé). TODO: à vérifier — E et α (plage de température)."
   }
 ]
