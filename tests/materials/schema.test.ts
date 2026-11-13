@@ -79,3 +79,49 @@ describe('MaterialSchema — entrées invalides', () => {
     expect(r.error?.issues[0]?.message).toBe('Re doit être ≤ Rm.');
   });
 });
+
+describe('MaterialSchema — aide au choix (prix, procédés, secteurs)', () => {
+  const selection = {
+    costIndex: 3,
+    costNote: 'fourchette fictive',
+    processes: {
+      usinage: { rating: 'bon', note: 'note' },
+      soudage: { rating: 'deconseille' },
+    },
+    sectors: ['aeronautique', 'medical'],
+    applicationNotes: 'exemples',
+    selectionSource: 'Source fictive',
+  };
+
+  it('accepte des indications complètes et sourcées', () => {
+    expect(parse(selection).success).toBe(true);
+  });
+
+  it('reste valide sans aucune indication (champs facultatifs)', () => {
+    expect(parse({}).success).toBe(true);
+  });
+
+  it.each([
+    ['indice 0', { costIndex: 0 }],
+    ['indice 6', { costIndex: 6 }],
+    ['indice non entier', { costIndex: 2.5 }],
+    ['procédé inconnu', { processes: { teleportation: { rating: 'bon' } } }],
+    ['niveau inconnu', { processes: { usinage: { rating: 'super' } } }],
+    ['champ inconnu dans un procédé', { processes: { usinage: { rating: 'bon', x: 1 } } }],
+    ['secteur inconnu', { sectors: ['cuisine'] }],
+    ['secteur en double', { sectors: ['medical', 'medical'] }],
+  ])('rejette : %s', (_label, overrides) => {
+    expect(parse({ ...selection, ...overrides }).success).toBe(false);
+  });
+
+  it.each([
+    ['indice de prix', { costIndex: 2 }],
+    ['procédés', { processes: { usinage: { rating: 'bon' } } }],
+    ['secteurs', { sectors: ['btp'] }],
+    ['emplois', { applicationNotes: 'charpente' }],
+  ])('exige une source quand on renseigne : %s', (_label, overrides) => {
+    const r = parse(overrides);
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0]?.path).toEqual(['selectionSource']);
+  });
+});

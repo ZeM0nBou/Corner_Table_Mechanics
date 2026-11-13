@@ -91,7 +91,15 @@ Un fichier JSON par famille dans `src/materials/data/` (`aciers.json`, `aluminiu
   thicknessRange_m?: [number, number],  // si Re dépend de l'épaisseur
   source: string,          // OBLIGATOIRE : norme ou référence
   verified: boolean,       // true seulement après relecture humaine
-  notes?: string
+  notes?: string,
+
+  // Aide au choix (qualitatif, facultatif) — listes fixes dans src/materials/selection.ts
+  costIndex?: 1 | 2 | 3 | 4 | 5,   // € à €€€€€, échelle en €/kg (demi-produit, petite quantité, distributeur)
+  costNote?: string,               // justification de l'indice
+  processes?: { [procédé]: { rating: "excellent" | "bon" | "precautions" | "deconseille", note?: string } },
+  sectors?: string[],              // clés de SECTORS (aéronautique, médical, BTP…)
+  applicationNotes?: string,       // exemples d'emplois
+  selectionSource?: string         // OBLIGATOIRE dès qu'un champ d'aide au choix est renseigné
 }
 ```
 

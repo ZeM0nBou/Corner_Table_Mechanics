@@ -7,6 +7,13 @@
  * (entrée non fiable) : les champs inconnus sont donc rejetés.
  */
 import { z } from 'zod';
+import { PROCESS_KEYS, RATINGS, SECTOR_KEYS } from './selection';
+
+const ProcessAptitudeSchema = z.strictObject({
+  rating: z.enum(RATINGS, { error: 'Niveau d’aptitude inconnu.' }),
+  /** Aide-mémoire court (précautions, alternatives…). */
+  note: z.string().trim().min(1).max(300).optional(),
+});
 
 const positive = (label: string) =>
   z
@@ -50,10 +57,44 @@ export const MaterialSchema = z
     source: z.string().trim().min(1, 'La source est obligatoire.').max(500),
     verified: z.boolean(),
     notes: z.string().max(2000).optional(),
+
+    // --- Aide au choix (qualitatif, facultatif) — voir selection.ts ---
+    /** Indice de prix de 1 (€) à 5 (€€€€€), échelle COST_SCALE. */
+    costIndex: z
+      .number()
+      .int('L’indice de prix doit être un entier.')
+      .min(1, 'L’indice de prix va de 1 à 5.')
+      .max(5, 'L’indice de prix va de 1 à 5.')
+      .optional(),
+    /** Justification de l'indice de prix (forme de produit, fourchette relevée…). */
+    costNote: z.string().trim().min(1).max(500).optional(),
+    /** Aptitude aux procédés de fabrication (procédés non listés = non renseignés). */
+    processes: z.partialRecord(z.enum(PROCESS_KEYS), ProcessAptitudeSchema).optional(),
+    /** Secteurs d'utilisation principaux. */
+    sectors: z
+      .array(z.enum(SECTOR_KEYS, { error: 'Secteur inconnu.' }))
+      .refine((s) => new Set(s).size === s.length, 'Secteur en double.')
+      .optional(),
+    /** Exemples d'emplois typiques. */
+    applicationNotes: z.string().trim().min(1).max(1000).optional(),
+    /** Source des indications qualitatives (prix, procédés, secteurs). */
+    selectionSource: z.string().trim().min(1).max(500).optional(),
   })
   .refine((m) => m.Re_Pa === undefined || m.Rm_Pa === undefined || m.Re_Pa <= m.Rm_Pa, {
     message: 'Re doit être ≤ Rm.',
     path: ['Re_Pa'],
-  });
+  })
+  .refine(
+    (m) =>
+      m.selectionSource !== undefined ||
+      (m.costIndex === undefined &&
+        m.processes === undefined &&
+        m.sectors === undefined &&
+        m.applicationNotes === undefined),
+    {
+      message: 'Indiquez la source du prix, des procédés ou des secteurs.',
+      path: ['selectionSource'],
+    },
+  );
 
 export type Material = z.infer<typeof MaterialSchema>;
