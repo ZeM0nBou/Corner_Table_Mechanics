@@ -119,3 +119,17 @@ describe('cas limites', () => {
     expect(() => compositeProperties([r])).toThrow(/dégénéré/);
   });
 });
+
+describe('axe neutre plastique', () => {
+  it('rectangle : au milieu', () => {
+    const p = compositeProperties([rect(0, 0.1, 0, 0.2)]);
+    expectRelClose(p.zPl_m, 0.1, 1e-9);
+    expectRelClose(p.yPl_m, 0.05, 1e-9);
+  });
+
+  it('T 100 × 100 × 10 : partage l’aire en deux (dans la semelle, 5 mm sous le dessus)', () => {
+    // A = 1900 mm² ; semelle 1000 mm² > A/2 = 950 mm² → zPl = 100 − 950/100 = 90,5 mm
+    const p = compositeProperties([rect(0, 0.1, 0.09, 0.1), rect(0.045, 0.055, 0, 0.09)]);
+    expectRelClose(p.zPl_m, 0.0905, 1e-9);
+  });
+});

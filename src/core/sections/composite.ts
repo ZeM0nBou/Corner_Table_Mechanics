@@ -46,6 +46,10 @@ export interface CompositeProperties {
   /** Module plastique autour de l'axe neutre plastique (aire coupée en deux moitiés égales). */
   Wpl_y_m3: number;
   Wpl_z_m3: number;
+  /** Axe neutre plastique de la flexion autour de y : cote z depuis le bas de la section. */
+  zPl_m: number;
+  /** Axe neutre plastique de la flexion autour de z : abscisse y depuis la gauche. */
+  yPl_m: number;
   principal: PrincipalAxes;
 }
 
@@ -93,7 +97,11 @@ function areaBelow(rects: readonly Rect[], c: number, axis: 'y' | 'z'): number {
  * Source : EN 1993-1-1 §6.2.5 (moment résistant plastique) ; Timoshenko & Gere
  * (flexion plastique). Position de dp obtenue par dichotomie (fonction monotone).
  */
-function plasticModulus(rects: readonly Rect[], axis: 'y' | 'z', A: number): number {
+function plasticModulus(
+  rects: readonly Rect[],
+  axis: 'y' | 'z',
+  A: number,
+): { W: number; dp: number } {
   let lo = Math.min(...rects.map((r) => (axis === 'z' ? r.z0 : r.y0)));
   let hi = Math.max(...rects.map((r) => (axis === 'z' ? r.z1 : r.y1)));
   for (let k = 0; k < 200 && hi - lo > 0; k += 1) {
@@ -112,7 +120,7 @@ function plasticModulus(rects: readonly Rect[], axis: 'y' | 'z', A: number): num
       if (p1 > p0) W += w * (p1 - p0) * Math.abs((p0 + p1) / 2 - dp);
     }
   }
-  return W;
+  return { W, dp };
 }
 
 /**
@@ -158,6 +166,10 @@ export function compositeProperties(rects: readonly Rect[]): CompositeProperties
     Iyz += b * h * dy * dz;
   }
 
+  // Flexion autour de y : axe neutre plastique horizontal (position en z), et inversement.
+  const plY = plasticModulus(rects, 'z', A);
+  const plZ = plasticModulus(rects, 'y', A);
+
   return {
     A_m2: A,
     yG_m: yG,
@@ -169,8 +181,10 @@ export function compositeProperties(rects: readonly Rect[]): CompositeProperties
     Iyz_m4: Iyz,
     Wel_y_m3: Iy / Math.max(zG, height - zG),
     Wel_z_m3: Iz / Math.max(yG, width - yG),
-    Wpl_y_m3: plasticModulus(rects, 'z', A),
-    Wpl_z_m3: plasticModulus(rects, 'y', A),
+    Wpl_y_m3: plY.W,
+    Wpl_z_m3: plZ.W,
+    zPl_m: plY.dp - zMin,
+    yPl_m: plZ.dp - yMin,
     principal: principalAxes(Iy, Iz, Iyz),
   };
 }

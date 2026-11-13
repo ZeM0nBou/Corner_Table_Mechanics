@@ -49,6 +49,10 @@ export interface SectionResult {
   Wel_z_m3: number;
   Wpl_y_m3: number;
   Wpl_z_m3: number;
+  /** Position de l'axe neutre plastique (flexion autour de y), depuis le bas. */
+  zPl_m: number;
+  /** Position de l'axe neutre plastique (flexion autour de z), depuis la gauche. */
+  yPl_m: number;
   iy_m: number;
   iz_m: number;
   principal: PrincipalAxes & { iu_m: number; iv_m: number };
@@ -284,6 +288,8 @@ export function computeSection(input: SectionInput): SectionResult {
         Wel_z_m3: I / (D / 2),
         Wpl_y_m3: Wpl,
         Wpl_z_m3: Wpl,
+        yPl_m: D / 2,
+        zPl_m: D / 2,
         iy_m: i,
         iz_m: i,
         principal: { Iu_m4: I, Iv_m4: I, alpha_rad: 0, iu_m: i, iv_m: i },
