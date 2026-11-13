@@ -122,6 +122,37 @@ Un fichier JSON par famille dans `src/materials/data/` (`aciers.json`, `aluminiu
 - Responsive : l'outil doit rester utilisable sur une tablette.
 - Avertissement permanent et discret : « Outil de pré-dimensionnement — ne remplace pas une note de calcul vérifiée. »
 
+## Dépôt public — sécurité
+
+Le dépôt GitHub est **public** : tout ce qui est poussé (code, historique complet, messages de commit, adresse e-mail des commits) est visible par tous, peut être copié et indexé, et le reste même après suppression.
+
+### Ne jamais committer
+- **Aucun secret** : token, clé API, mot de passe, clé SSH, certificat, fichier `.env*`. L'application est 100 % statique et n'a besoin d'aucun secret. Si un secret semble nécessaire, s'arrêter et me demander.
+- **Aucune donnée confidentielle** : notes de calcul ou plans de clients, données d'employeur, noms de projets réels, chemins locaux contenant des informations personnelles. Les exemples et les tests utilisent des cas de manuels ou des valeurs fictives.
+- **Pas de texte protégé par le droit d'auteur** : ne pas recopier de paragraphes ni de tableaux de normes (EN, ISO…) ou d'ouvrages (Roark…). Citer la référence et ne reprendre que les valeurs numériques utiles.
+- Relire `git diff --staged` avant chaque commit. Si un secret a été poussé, me prévenir immédiatement : il doit être **révoqué**, car réécrire l'historique ne suffit pas.
+
+### Historique git
+- Ne jamais faire `git push --force` sur `main`, ni réécrire un historique déjà poussé.
+- Ne pas modifier l'identité git (nom ou e-mail) sans me demander.
+
+### GitHub Actions
+- Permissions minimales : `contents: read` par défaut, et les droits d'écriture seulement dans le job qui en a besoin (déploiement).
+- Ne jamais utiliser le déclencheur `pull_request_target`.
+- Ne jamais insérer `${{ github.event.* }}` (titre de PR, nom de branche…) directement dans un `run:` : c'est une injection de commandes possible. Passer par une variable `env:`.
+- Actions autorisées : les actions officielles `actions/*`, épinglées sur une version. Toute autre action doit m'être soumise avant d'être ajoutée.
+- Aucun secret dans les workflows.
+
+### Dépendances
+- Une nouvelle dépendance doit être maintenue et largement utilisée. Vérifier l'orthographe exacte du paquet (risque de typosquatting).
+- `package-lock.json` est toujours commité, et la CI utilise `npm ci`.
+- Pas de `npm audit fix --force` sans mon accord : il peut installer des versions majeures cassantes.
+
+### Code de l'application
+- Un lien partagé (URL) et un fichier JSON importé sont des **entrées non fiables** : toujours les valider avec Zod, borner leur taille (y compris après décompression) et rejeter proprement ce qui est invalide.
+- Jamais de `dangerouslySetInnerHTML`, `eval` ni `new Function`, et ne jamais construire de HTML à partir de données utilisateur.
+- Ne rien stocker de sensible dans `localStorage`.
+
 ## Feuille de route (dans cet ordre)
 
 1. Socle : projet Vite + TS + tests + déploiement GitHub Pages fonctionnel, page d'accueil vide
