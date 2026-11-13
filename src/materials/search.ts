@@ -3,6 +3,7 @@
  * Fonctions pures, indépendantes de l'UI.
  */
 import type { Material } from './schema';
+import { SECTORS } from './selection';
 
 /** Texte normalisé pour comparaison : minuscules, sans accents, espaces réduits. */
 export function normalizeText(text: string): string {
@@ -11,14 +12,22 @@ export function normalizeText(text: string): string {
 
 /**
  * Vrai si tous les mots de la requête apparaissent dans le nom, la famille,
- * l'état, la norme ou l'identifiant du matériau (ordre indifférent).
- * Une requête vide accepte tout.
+ * l'état, la norme, l'identifiant, les secteurs ou les exemples d'emplois du
+ * matériau (ordre indifférent). Une requête vide accepte tout.
  */
 export function matchesQuery(m: Material, query: string): boolean {
   const tokens = normalizeText(query).split(' ').filter(Boolean);
   if (tokens.length === 0) return true;
   const haystack = normalizeText(
-    [m.name, m.family, m.condition ?? '', m.standard ?? '', m.id].join(' '),
+    [
+      m.name,
+      m.family,
+      m.condition ?? '',
+      m.standard ?? '',
+      m.id,
+      ...(m.sectors ?? []).map((s) => SECTORS[s]),
+      m.applicationNotes ?? '',
+    ].join(' '),
   );
   return tokens.every((t) => haystack.includes(t));
 }

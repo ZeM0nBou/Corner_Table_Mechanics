@@ -90,3 +90,23 @@ describe('knownFamilies', () => {
     ).toEqual(['Élastomère', 'acier']);
   });
 });
+
+describe('recherche par secteur et par emploi', () => {
+  const ti = mat('ti', 'alliage de titane', {
+    name: 'Ti-6Al-4V',
+    sectors: ['aeronautique', 'medical'],
+    applicationNotes: 'implants orthopédiques',
+    selectionSource: 'fictive',
+  });
+
+  it.each(['médical', 'medical', 'aéronautique', 'implant', 'titane medical'])(
+    'trouve Ti-6Al-4V avec %j',
+    (q) => {
+      expect(matchesQuery(ti, q)).toBe(true);
+    },
+  );
+
+  it('ne trouve pas un secteur absent', () => {
+    expect(matchesQuery(ti, 'ferroviaire')).toBe(false);
+  });
+});

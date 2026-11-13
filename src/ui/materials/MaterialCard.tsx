@@ -3,6 +3,7 @@ import { fromSI } from '@core/units';
 import type { Material } from '@materials/index';
 import { QuantityValue } from '@ui/components/QuantityValue';
 import { formatNumber } from '@ui/format';
+import { SelectionGuide } from './SelectionGuide';
 
 function Row({ label, symbol, children }: { label: string; symbol: string; children: ReactNode }) {
   return (
@@ -133,6 +134,8 @@ export function MaterialCard({ material: m, isCustom = false, actions }: Materia
           </p>
         )}
       </div>
+
+      <SelectionGuide material={m} />
     </article>
   );
 }
