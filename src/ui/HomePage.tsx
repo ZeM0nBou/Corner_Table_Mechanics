@@ -17,7 +17,11 @@ const MODULES: readonly ModuleEntry[] = [
     description: 'A, I, Wel, Wpl, i, J, Av — rectangle, rond, tube, I, U, L, T',
     route: 'sections',
   },
-  { name: 'Poutres isostatiques', description: 'Réactions, V, M, flèche' },
+  {
+    name: 'Poutres isostatiques',
+    description: 'Réactions, V, M, flèche — console, deux appuis, porte-à-faux',
+    route: 'poutres',
+  },
   { name: 'Contraintes et critères', description: 'von Mises, Tresca, sécurité' },
   { name: 'Flambement d’Euler', description: 'Longueurs de flambement usuelles' },
 ];

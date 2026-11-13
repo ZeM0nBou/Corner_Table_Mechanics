@@ -1,3 +1,4 @@
+import { BeamsPage } from '@ui/beams/BeamsPage';
 import { Disclaimer } from '@ui/components/Disclaimer';
 import { HomePage } from '@ui/HomePage';
 import { MaterialsPage } from '@ui/materials/MaterialsPage';
@@ -8,6 +9,7 @@ const NAV = [
   { route: '', label: 'Accueil' },
   { route: 'materiaux', label: 'Matériaux' },
   { route: 'sections', label: 'Sections' },
+  { route: 'poutres', label: 'Poutres' },
 ] as const;
 
 function Page({ route }: { route: string }) {
@@ -16,6 +18,8 @@ function Page({ route }: { route: string }) {
       return <MaterialsPage />;
     case 'sections':
       return <SectionsPage />;
+    case 'poutres':
+      return <BeamsPage />;
     default:
       return <HomePage />;
   }

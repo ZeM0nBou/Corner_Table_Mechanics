@@ -16,16 +16,17 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 | 2ter. Aide au choix des matériaux                   | ✅         | Indice de prix (€ à €€€€€), aptitude à 17 procédés, secteurs, emplois, atouts et limites                                                                    |
 | 3. Sections                                         | ✅         | 8 formes paramétriques, schéma coté, résultats avec formules LaTeX et application numérique                                                                 |
 | 3bis. Catalogue de profilés (IPE, HEA, HEB, UPN, L) | ⏳ à faire | —                                                                                                                                                           |
-| 4. Poutres isostatiques                             | ⏳ à faire | —                                                                                                                                                           |
+| 4. Poutres isostatiques                             | ✅         | Console, deux appuis avec porte-à-faux ; forces, couples, charges réparties linéaires ; réactions, V, M, rotation, flèche ; diagrammes SVG                  |
 | 5 à 8                                               | ⏳ à faire | Contraintes, flambement, partage par URL et export PDF, modules complémentaires                                                                             |
 
-**Qualité :** 300 tests Vitest, lint et vérification des types sans erreur, 37 commits. La CI bloque le déploiement si un test échoue.
+**Qualité :** 383 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
 
 ### Pages de l'application
 
 - **Accueil :** liste des modules et hypothèses par défaut.
 - **Matériaux (`#/materiaux`) :** liste avec recherche (nom, norme, état, secteur, atouts), familles repliables, matériaux personnalisés en grisé dans leur famille. La fiche affiche les propriétés avec unités au choix, l'aide au choix, la source et les badges « non vérifié » et « personnalisé ». Formulaire de création contrôlé champ par champ ; import et export JSON.
 - **Sections (`#/sections`) :** rectangle plein ou creux, rond, tube, profilés I/H, U, L, T. Schéma coté à l'échelle, cotes avec unités, choix facultatif d'un matériau pour la masse linéique. Résultats : A, G, Iy, Iz, Wel, Wpl, i, J, Av, plus les axes principaux pour la cornière. Formule et application numérique avec leur source sous chaque résultat (bouton ƒ, ou « Toutes / Aucune »).
+- **Poutres (`#/poutres`) :** poutre sur deux appuis (porte-à-faux réglables) ou console encastrée à gauche ou à droite. Charges en liste : force ponctuelle, couple, charge uniforme, charge linéaire (triangle, trapèze), sur toute la longueur ou partielle. Rigidité : E du matériau ou saisi, I d'une section paramétrique ou saisi ; sans EI, seuls les réactions, V et M sont donnés. Résultats : réactions, |V|max, |M|max, flèche maximale, L/δ, rotation maximale, avec leur abscisse. Diagrammes V, M et flèche avec lecture exacte au survol. Formule fermée (bouton ƒ) quand un cas de table est reconnu ; volet « Détail du calcul » pour la méthode et les hypothèses.
 
 ---
 
@@ -38,6 +39,7 @@ src/
   core/           TypeScript pur, aucune dépendance à React (règle vérifiée par ESLint)
     units.ts      conversions d'unités
     sections/     composite.ts (moteur à rectangles), shapes.ts (formes usuelles)
+    beams/        model.ts (types, validation), solver.ts (Macaulay), analysis.ts (extremums, échantillons), sources.ts
   materials/      schéma Zod, données JSON, chargement, recherche, matériaux personnalisés
   ui/             composants React, un dossier par module (materials/, sections/)
   share/          vide (prévu pour l'étape 7)
@@ -80,7 +82,32 @@ SECTION_SOURCES                                           // sources affichées 
   - géométrie pour le dessin, formules, sources et hypothèses.
 - **Méthode des profils I, U, L, T et du rectangle creux :** décomposition en rectangles. Le centre de gravité et les moments quadratiques viennent du théorème de Huygens. Wpl s'obtient en cherchant l'axe neutre plastique par dichotomie. Le rond et le tube utilisent des formules fermées.
 
+### 2.3bis API des poutres (`@core/beams`)
+
+```ts
+solveBeam(model: BeamModel, options?: { allowHyperstatic?: boolean }): BeamSolution  // lève BeamModelError
+shear_N(sol, x, côté?) · moment_Nm(sol, x, côté?) · slope_rad(sol, x) · deflection_m(sol, x)
+beamExtrema(sol): BeamExtrema          // min et max de V, M, θ, w avec leur abscisse
+sampleBeam(sol, nbPoints?): BeamSample[]  // points doublés aux discontinuités
+combineSolutions([{ solution, factor }]): BeamSolution  // superposition de cas
+classifyBeam(model) · validateBeamModel(model) · loadTerms(model) · breakpoints(sol)
+BEAM_SOURCES · BEAM_ASSUMPTIONS
+```
+
+- **Modèle :** `{ length_m, EI_Nm2?, supports, loads }`.
+  - Appuis à position libre : `appui` (w = 0) ou `encastrement` (w = 0 et θ = 0).
+  - Charges : `ponctuelle` (x, Fz), `couple` (x, C), `repartie` (x1, x2, q1, q2, variation linéaire).
+- **Méthode :** fonctions de singularité (Macaulay). Chaque charge ou réaction est un terme c·⟨x − a⟩ⁿ, intégré exactement. Les inconnues (réactions, EI·θ₀, EI·w₀) viennent d'un système linéaire (équilibre + conditions aux appuis) résolu par pivot de Gauss, adimensionné par L. EI constant n'intervient pas dans le système.
+- **Hyperstatique :** le solveur le traite déjà (testé : encastrée-appuyée, bi-encastrée, deux travées). Il est refusé par défaut ; `allowHyperstatic: true` le débloque. L'UI ne l'expose pas encore.
+- **Superposition :** la solution est une liste de termes, donc additionnable et pondérable par `combineSolutions` sans recalcul (même longueur, même EI, mêmes appuis).
+- **Extremums :** valeurs aux bornes de chaque tronçon et aux zéros de la dérivée (q pour V, V pour M, M pour θ, θ pour w), trouvés par dichotomie.
+- **Sans effort normal :** articulation et appui à rouleau sont confondus.
+
 ### 2.4 Conventions
+
+- **Poutres, dans le moteur :** forces, charges réparties, réactions et flèche positives vers le haut (+z) ; couples et rotation positifs dans le sens trigonométrique ; V = somme des forces vers le haut à gauche de la coupe ; M positif quand la fibre inférieure est tendue. D'où dV/dx = q, dM/dx = V, EI·w″ = M. Un couple trigonométrique C fait sauter M de −C.
+- **Poutres, dans l'UI :** forces et charges réparties saisies positives **vers le bas** ; le signe est inversé dans `beamForm.ts`, et nulle part ailleurs. Les couples gardent le sens trigonométrique.
+- **Diagrammes :** SVG maison (`BeamDiagram`, fonctions pures dans `diagram.ts`), pas de Recharts.
 
 - **Axes (EN 1993-1-1 §1.7) :** y horizontal vers la droite, z vertical vers le haut, x le long de la poutre. Iy correspond à la flexion autour de y (axe fort d'un I).
 - **Origine O :** coin inférieur gauche de la boîte englobante. yG et zG sont donnés depuis O.
@@ -128,6 +155,17 @@ SECTION_SOURCES                                           // sources affichées 
 - **Profilé I :** seulement symétrique (semelles identiques).
 - **Aire de cisaillement :** non définie pour la cornière ni pour Vy sur le T. Pour les I/H, η = 1 et r = 0.
 
+### Poutres
+
+- **Euler-Bernoulli :** la flèche due à l'effort tranchant est négligée (poutres courtes sous-estimées).
+- **EI constant** sur toute la longueur ; flexion plane autour de y, sans effort normal ni torsion.
+- **Pas d'appui élastique, de rotule interne ni de tassement imposé.**
+- **UI limitée à l'isostatique :** deux appuis ou un encastrement en bout. Le solveur accepte d'autres configurations, non exposées.
+- **Formules fermées affichées pour 7 cas de table seulement** (une seule charge) ; les autres chargements n'affichent que la méthode générale, sans expression de M(x) par tronçon.
+- **Extremums :** deux zéros distants de moins de 1/32 de tronçon peuvent être manqués.
+- **Rapport L/δ :** calculé avec la longueur totale, y compris pour une console ou un porte-à-faux.
+- **Pas de vérification de contrainte** (étape 5) ni de poids propre automatique.
+
 ### Application
 
 - **Interface non testée automatiquement :** les composants React n'ont pas de tests (ni jsdom ni Testing Library), seules les fonctions pures de l'UI le sont. Le rendu (schéma, panneaux) se vérifie à la main.
@@ -163,9 +201,14 @@ SECTION_SOURCES                                           // sources affichées 
 - [ ] Paragraphes de Timoshenko & Gere pour les axes principaux.
 - [ ] EN 1993-1-1 §6.2.6(3) : vérifier Av pour les barres pleines (rectangle, rond), le rectangle creux, le tube et le T.
 
+**Poutres (`src/core/beams/`)**
+
+- [ ] Numéros de cas du tableau 8.1 de Roark (8ᵉ éd.) et de l'annexe de Gere & Goodno pour les formules fermées. Les valeurs ont été recoupées par le solveur (accord à 1e-9), pas avec les ouvrages.
+- [ ] Paragraphes de Hibbeler et de Gere & Goodno pour les fonctions de singularité et la superposition ; référence exacte de l'article de Macaulay (1919).
+
 ### Développement
 
 - [ ] **Étape 3bis :** catalogue IPE, HEA, HEB, UPN et cornières, valeurs sourcées (ArcelorMittal, EN 10365) en `verified: false`.
-- [ ] **Étape 4 :** poutres isostatiques (console, appui simple ; charges ponctuelle, répartie, moment) et diagrammes V, M et flèche.
+- [ ] **Poutres, suites possibles :** exposer l'hyperstatique dans l'UI, cas de charge pondérés (`combineSolutions`), poids propre depuis le matériau et la section, expression de M(x) par tronçon.
 - [ ] **Étapes 5 à 8 :** contraintes et critères, flambement d'Euler, partage par URL et export PDF, modules complémentaires.
 - [ ] Éventuellement : tests de composants React (nécessite jsdom et Testing Library, à valider), centre de cisaillement, profilé I à semelles différentes.
