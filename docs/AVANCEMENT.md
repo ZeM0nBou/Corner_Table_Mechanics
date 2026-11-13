@@ -29,8 +29,8 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 - **Poutres (`#/poutres`) :** schéma, puis appuis, charges, section et matériau, résultats et diagrammes (les charges sont juste sous le schéma pour voir son évolution).
   - **Appuis :** liste libre d'appuis simples et d'encastrements (A, B, C… dans l'ordre de la liste), ajout, suppression, et configurations usuelles en un clic (deux appuis, consoles, encastrée-appuyée, bi-encastrée). Les appuis placés à l'extrémité droite suivent la longueur. Poutre isostatique ou hyperstatique, signalée dans les résultats.
   - **Charges :** force ponctuelle, couple, charge uniforme, charge linéaire (triangle, trapèze), totale ou partielle. Chaque charge a sa couleur (palette catégorielle à 8 teintes, vérifiée pour les daltonismes) et son numéro, sur le schéma et dans la liste ; la couleur suit la charge quand une autre est supprimée.
-  - **Poids propre :** activé par défaut, q = ρ·A·g₀ (ou m′·g₀ en saisie directe), dessiné en gris (« pp ») ; ignoré avec un message si le matériau ou la section manquent.
-  - **Rigidité :** E du matériau ou saisi, I d'une section paramétrique ou saisi ; sans EI, seuls les réactions, V et M sont donnés.
+  - **Poids propre :** activé par défaut et toujours en tête de la liste des charges, q = ρ·A·g₀ (ou m′·g₀ en saisie directe), dessiné en gris (« pp ») ; ignoré avec un message si le matériau ou la section manquent.
+  - **Rigidité :** E du matériau ou saisi, I d'une section paramétrique (avec le schéma coté de l'onglet Sections et un bouton ⓘ qui montre les vignettes des formes au survol) ou saisi ; sans EI, seuls les réactions, V et M sont donnés.
   - **Résultats :** réactions et couples d'encastrement, |V|max, |M|max, flèche maximale, L/δ, rotation maximale, avec leur abscisse. Diagrammes V, M et flèche (toutes charges cumulées) avec lecture exacte au survol. Formule fermée (bouton ƒ) quand un cas de table est reconnu ; volet « Détail du calcul ».
 
 ---

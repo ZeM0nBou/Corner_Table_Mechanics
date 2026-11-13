@@ -19,11 +19,13 @@ import {
   computeSection,
   linearMass_kg_m,
   SectionGeometryError,
+  type SectionResult,
   type SectionShape,
 } from '@core/sections';
 import { fromSI, type UnitOf } from '@core/units';
 import { REFERENCE_MATERIALS } from '@materials/index';
 import { Button } from '@ui/components/Button';
+import { InfoTip } from '@ui/components/InfoTip';
 import { QuantityValue } from '@ui/components/QuantityValue';
 import { Tex } from '@ui/components/Tex';
 import { UnitInput } from '@ui/components/UnitInput';
@@ -32,6 +34,8 @@ import { formatNumber } from '@ui/format';
 import { MaterialDropdown } from '@ui/materials/MaterialDropdown';
 import { useCustomMaterials } from '@ui/materials/useCustomMaterials';
 import { buildSectionInput, defaultDims, SHAPES, shapeSpec } from '@ui/sections/sectionForm';
+import { SectionDrawing } from '@ui/sections/SectionDrawing';
+import { ShapeThumbnail } from '@ui/sections/ShapeThumbnail';
 import { BeamDiagram } from './BeamDiagram';
 import { BeamDrawing, type LoadStyle } from './BeamDrawing';
 import {
@@ -606,6 +610,10 @@ export function BeamsPage() {
   const E = material?.E_Pa ?? manualE;
 
   const dims = dimsByShape[shape] ?? defaultDims(shape);
+  const numericDims = Object.fromEntries(
+    shapeSpec(shape).dims.map((d) => [d.key, dims[d.key] ?? NaN]),
+  );
+  let section: SectionResult | undefined;
   let sectionI: number | undefined;
   let sectionA: number | undefined;
   let sectionError: string | undefined;
@@ -615,6 +623,7 @@ export function BeamsPage() {
     else {
       try {
         const s = computeSection(input);
+        section = s;
         sectionI = s.Iy_m4;
         sectionA = s.A_m2;
       } catch (e) {
@@ -771,6 +780,12 @@ export function BeamsPage() {
       <section className="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
         <h3 className="font-medium">Charges</h3>
         <ul className="grid gap-3 md:grid-cols-2">
+          <SelfWeightEditor
+            enabled={form.selfWeight}
+            onToggle={(selfWeight) => setForm((f) => ({ ...f, selfWeight }))}
+            value_N_m={selfWeight}
+            missing={massMissing}
+          />
           {form.loads.map((load, i) => (
             <LoadEditor
               key={load.id}
@@ -782,12 +797,6 @@ export function BeamsPage() {
               }
             />
           ))}
-          <SelfWeightEditor
-            enabled={form.selfWeight}
-            onToggle={(selfWeight) => setForm((f) => ({ ...f, selfWeight }))}
-            value_N_m={selfWeight}
-            missing={massMissing}
-          />
         </ul>
         <div className="no-print flex flex-wrap gap-2">
           {LOAD_KINDS.map((k) => (
@@ -866,6 +875,11 @@ export function BeamsPage() {
                 />
               </p>
             )}
+            {inertiaMode === 'section' && section && (
+              <div className="mx-auto w-full max-w-xs rounded-md border border-slate-100 p-2">
+                <SectionDrawing section={section} shape={shape} dims={numericDims} />
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -895,9 +909,25 @@ export function BeamsPage() {
             </div>
             {inertiaMode === 'section' ? (
               <>
-                <label className="flex flex-col gap-1 text-sm text-slate-700">
-                  Forme de la section
+                <div className="flex flex-col gap-1 text-sm text-slate-700">
+                  <span className="flex items-center gap-1.5">
+                    <span id="forme-section-poutre">Forme de la section</span>
+                    <InfoTip label="Aperçu des formes de section">
+                      <span className="grid grid-cols-4 gap-2">
+                        {SHAPES.map((s) => (
+                          <span
+                            key={s.shape}
+                            className={`flex w-20 flex-col items-center gap-1 rounded-md p-1 text-center text-xs ${s.shape === shape ? 'bg-sky-50 text-sky-900 ring-1 ring-sky-300' : 'text-slate-600'}`}
+                          >
+                            <ShapeThumbnail shape={s.shape} />
+                            {s.label}
+                          </span>
+                        ))}
+                      </span>
+                    </InfoTip>
+                  </span>
                   <select
+                    aria-labelledby="forme-section-poutre"
                     value={shape}
                     onChange={(e) => {
                       const next = SHAPES.find((s) => s.shape === e.target.value);
@@ -911,7 +941,7 @@ export function BeamsPage() {
                       </option>
                     ))}
                   </select>
-                </label>
+                </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {shapeSpec(shape).dims.map((d) => (
                     <UnitInput
