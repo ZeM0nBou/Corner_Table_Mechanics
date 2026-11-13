@@ -77,7 +77,8 @@ export class SectionGeometryError extends RangeError {
 
 // --- Sources -----------------------------------------------------------------
 
-const SRC = {
+/** Sources des formules de section (affichées avec chaque résultat dans l'UI). */
+export const SECTION_SOURCES = {
   plane:
     'Roark’s Formulas for Stress and Strain, 8e éd., propriétés des sections planes ; Timoshenko & Gere, Mechanics of Materials. TODO: à vérifier — n° de tableau.',
   huygens:
@@ -91,6 +92,8 @@ const SRC = {
   open: 'Profil mince ouvert, J ≈ Σ bᵢ tᵢ³ / 3 (Roark 8e éd., chap. 10 ; Timoshenko & Goodier). Congés et jonctions négligés.',
   av: 'EN 1993-1-1:2005 §6.2.6(3).',
 } as const;
+
+const SRC = SECTION_SOURCES;
 
 const BASE_ASSUMPTIONS = [
   'Matériau homogène ; petites déformations.',

@@ -6,7 +6,12 @@
  * intermédiaires sont les cotes saisies et les rectangles de la décomposition.
  * Application numérique en millimètres (mm, mm², mm³, mm⁴).
  */
-import { linearMass_kg_m, type SectionResult, type SectionShape } from '@core/sections';
+import {
+  linearMass_kg_m,
+  SECTION_SOURCES,
+  type SectionResult,
+  type SectionShape,
+} from '@core/sections';
 
 export type ResultKey =
   | 'A'
@@ -31,6 +36,8 @@ export type ResultKey =
   | 'Avy';
 
 export interface ResultFormula {
+  /** Source de la formule (renseignée pour toutes les formules renvoyées). */
+  source?: string;
   /** Formule littérale (LaTeX). */
   latex: string;
   /** Application numérique (LaTeX), terminée par le résultat. */
@@ -419,5 +426,37 @@ export function resultFormulas(
       application: `= ${tex(rho)}\\text{ kg/m}^3 \\times ${tex(s.A_m2)}\\text{ m}^2 = ${tex(linearMass_kg_m(s.A_m2, rho))}\\text{ kg/m}`,
     };
   }
+  for (const [k, f] of Object.entries(out) as [ResultKey, ResultFormula][]) {
+    f.source = sourceFor(shape, k);
+  }
   return out;
+}
+
+/** Source de chaque formule (CLAUDE.md : chaque résultat affiche sa source). */
+function sourceFor(shape: SectionShape, key: ResultKey): string {
+  const S = SECTION_SOURCES;
+  const composite = shape === 'U' || shape === 'L' || shape === 'T';
+  switch (key) {
+    case 'm':
+      return 'Définition de la masse linéique, m′ = ρ A (matériau homogène).';
+    case 'Wply':
+    case 'Wplz':
+      return S.wpl;
+    case 'Avz':
+    case 'Avy':
+      return S.av;
+    case 'J':
+      if (shape === 'rectangle') return S.torsionRect;
+      if (shape === 'rectangleCreux') return S.bredt;
+      if (shape === 'rond' || shape === 'tube') return S.torsionRound;
+      return S.open;
+    case 'Iyz':
+    case 'Iu':
+    case 'Iv':
+    case 'alpha':
+    case 'iv':
+      return S.plane;
+    default:
+      return composite ? S.huygens : S.plane;
+  }
 }

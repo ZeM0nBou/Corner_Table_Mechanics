@@ -6,7 +6,6 @@ import {
   type SectionResult,
   type SectionShape,
 } from '@core/sections';
-import { fromSI } from '@core/units';
 import { REFERENCE_MATERIALS } from '@materials/index';
 import { QuantityValue } from '@ui/components/QuantityValue';
 import { Tex } from '@ui/components/Tex';
@@ -156,9 +155,11 @@ function buildRows(s: SectionResult, rho: number | undefined): ResultRow[] {
 function Results({
   rows,
   formulas,
+  assumptions,
 }: {
   rows: ResultRow[];
   formulas: Partial<Record<ResultKey, ResultFormula>>;
+  assumptions: readonly string[];
 }) {
   const [shown, setShown] = useState<ReadonlySet<ResultKey>>(new Set());
   const withFormula = rows.filter((r) => formulas[r.key] !== undefined).map((r) => r.key);
@@ -243,6 +244,9 @@ function Results({
                       <div className="overflow-x-auto rounded-md bg-slate-50 px-3 py-2 text-sm">
                         <Tex expr={f.latex} className="block" />
                         <Tex expr={f.application} className="mt-1 block text-slate-700" />
+                        {f.source && (
+                          <p className="mt-1.5 text-xs text-slate-500">Source : {f.source}</p>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -252,79 +256,11 @@ function Results({
           })}
         </tbody>
       </table>
-    </section>
-  );
-}
-
-function Detail({ s, inputs }: { s: SectionResult; inputs: { label: string; value: string }[] }) {
-  const mm = (x: number) => formatNumber(fromSI(x, 'length', 'mm'));
-  return (
-    <details className="rounded-lg border border-slate-200 bg-white p-4">
-      <summary className="cursor-pointer font-medium">Détail du calcul</summary>
-      <div className="mt-3 space-y-4 text-sm">
-        <div>
-          <h4 className="font-medium">Données</h4>
-          <ul className="mt-1 list-inside list-disc text-slate-700">
-            {inputs.map((i) => (
-              <li key={i.label}>
-                {i.label} = {i.value}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h4 className="font-medium">Méthodes et sources</h4>
-          <ul className="mt-1 space-y-2">
-            {s.formulas.map((f) => (
-              <li key={f.quantity}>
-                <span className="font-medium">{f.quantity} : </span>
-                <code className="rounded bg-slate-100 px-1">{f.formula}</code>
-                <span className="block text-xs text-slate-500">Source : {f.source}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        {s.geometry.kind === 'rects' && (
-          <div>
-            <h4 className="font-medium">Décomposition en rectangles (mm, depuis O)</h4>
-            <div className="overflow-x-auto">
-              <table className="mt-1 text-xs tabular-nums">
-                <thead>
-                  <tr className="text-left text-slate-500">
-                    <th className="pr-3">n°</th>
-                    <th className="pr-3">y₀ – y₁</th>
-                    <th className="pr-3">z₀ – z₁</th>
-                    <th className="pr-3">Aᵢ (mm²)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {s.geometry.rects.map((r, i) => (
-                    <tr key={i}>
-                      <td className="pr-3">{i + 1}</td>
-                      <td className="pr-3">
-                        {mm(r.y0)} – {mm(r.y1)}
-                      </td>
-                      <td className="pr-3">
-                        {mm(r.z0)} – {mm(r.z1)}
-                      </td>
-                      <td className="pr-3">{formatNumber((r.y1 - r.y0) * (r.z1 - r.z0) * 1e6)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-        <div>
-          <h4 className="font-medium">Hypothèses</h4>
-          <ul className="mt-1 list-inside list-disc text-slate-700">
-            {s.assumptions.map((a) => (
-              <li key={a}>{a}</li>
-            ))}
-          </ul>
-        </div>
+      <div className="mt-3 text-xs text-slate-500">
+        <span className="font-medium text-slate-600">Hypothèses : </span>
+        {assumptions.join(' ')}
       </div>
-    </details>
+    </section>
   );
 }
 
@@ -412,8 +348,22 @@ export function SectionsPage() {
             custom={custom.materials}
             value={materialId}
             onChange={setMaterialId}
-            label="Matériau (facultatif, pour la masse linéique)"
+            label="Matériau (uniquement pour la masse linéique)"
           />
+          {material && (
+            <p className="flex flex-wrap items-center gap-x-2 text-sm text-slate-700">
+              <span>
+                Masse volumique <i className="font-serif">ρ</i> :
+              </span>
+              <QuantityValue
+                key={material.id}
+                valueSI={material.rho_kg_m3}
+                quantity="density"
+                defaultUnit="kg/m³"
+                label="ρ"
+              />
+            </p>
+          )}
         </div>
       </div>
 
@@ -421,26 +371,7 @@ export function SectionsPage() {
         <Results
           rows={buildRows(result, material?.rho_kg_m3)}
           formulas={resultFormulas(shape, numericDims, result, material?.rho_kg_m3)}
-        />
-      )}
-
-      {result && (
-        <Detail
-          s={result}
-          inputs={[
-            ...spec.dims.map((d) => ({
-              label: `${d.label} ${d.symbol}`,
-              value: `${formatNumber(fromSI(dims[d.key] ?? NaN, 'length', 'mm'))} mm`,
-            })),
-            ...(material
-              ? [
-                  {
-                    label: `Masse volumique ρ (${material.name})`,
-                    value: `${formatNumber(material.rho_kg_m3)} kg/m³`,
-                  },
-                ]
-              : []),
-          ]}
+          assumptions={result.assumptions}
         />
       )}
     </div>

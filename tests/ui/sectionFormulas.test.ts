@@ -78,3 +78,17 @@ describe('lisibilité de l’application numérique', () => {
     expect(f.Iy?.application).not.toMatch(/10\^\{-1[0-9]\}/);
   });
 });
+
+describe('traçabilité', () => {
+  it('chaque formule affichée porte une source', () => {
+    for (const spec of SHAPES) {
+      const dims = defaultDims(spec.shape);
+      const input = buildSectionInput(spec.shape, dims);
+      if (!input) throw new Error(spec.shape);
+      const f = resultFormulas(spec.shape, dims, computeSection(input), 7850);
+      for (const [k, v] of Object.entries(f)) {
+        expect(v.source?.length, `${spec.shape} / ${k}`).toBeGreaterThan(10);
+      }
+    }
+  });
+});
