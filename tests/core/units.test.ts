@@ -26,6 +26,11 @@ describe('toSI — valeurs de référence', () => {
     ['density', 'g/cm³', 7.85, 7850],
     ['linearMass', 'g/m', 7850, 7.85],
     ['thermalExpansion', '10⁻⁶/K', 12, 12e-6],
+    ['lineLoad', 'kN/m', 2.5, 2500],
+    ['lineLoad', 'N/mm', 1, 1000],
+    ['lineLoad', 'daN/m', 150, 1500],
+    ['angle', 'mrad', 5, 5e-3],
+    ['angle', '°', 180, Math.PI],
   ] as const)('%s : %d → SI', (quantity, unit, value, expected) => {
     // Cast nécessaire : it.each perd la corrélation grandeur/unité.
     expectRelClose(toSI(value, quantity as Quantity, unit as never), expected);

@@ -12,6 +12,10 @@
  *
  * Exception : le daN n'est pas une unité à préfixe recommandée par le SI, mais
  * il est d'usage courant en mécanique (1 daN = 10 N exactement).
+ *
+ * Seconde exception : le degré d'angle, 1° = π/180 rad (Brochure SI, tableau 8,
+ * unités en dehors du SI dont l'usage est accepté) ; ce facteur n'est pas une
+ * puissance de dix.
  */
 
 /** Facteur multiplicatif vers l'unité SI de la grandeur (valeur_SI = valeur × facteur). */
@@ -36,6 +40,10 @@ export const UNITS = {
   linearMass: { 'g/m': 1e-3, 'kg/m': 1 },
   /** Coefficient de dilatation thermique — SI : 1/K */
   thermalExpansion: { '1/K': 1, '10⁻⁶/K': 1e-6 },
+  /** Charge linéique — SI : N/m (1 N/mm = 1 kN/m = 10³ N/m) */
+  lineLoad: { 'N/m': 1, 'daN/m': 10, 'kN/m': 1e3, 'N/mm': 1e3 },
+  /** Angle plan — SI : rad (1° = π/180 rad) */
+  angle: { rad: 1, mrad: 1e-3, '°': Math.PI / 180 },
 } as const;
 
 /** Grandeur physique gérée par le module. */
@@ -56,6 +64,8 @@ export const SI_UNIT = {
   density: 'kg/m³',
   linearMass: 'kg/m',
   thermalExpansion: '1/K',
+  lineLoad: 'N/m',
+  angle: 'rad',
 } as const satisfies { [Q in Quantity]: UnitOf<Q> };
 
 /** Liste ordonnée des unités d'une grandeur (pour les sélecteurs de l'UI). */
