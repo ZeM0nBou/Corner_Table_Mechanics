@@ -1,0 +1,19 @@
+[
+  {
+    "id": "ti-6al-4v-gr5",
+    "name": "Ti-6Al-4V (grade 5)",
+    "family": "alliage de titane",
+    "standard": "ASTM B265",
+    "condition": "recuit",
+    "E_Pa": 113.8e9,
+    "nu": 0.342,
+    "rho_kg_m3": 4430,
+    "Re_Pa": 828e6,
+    "Rm_Pa": 895e6,
+    "A_percent": 10,
+    "alpha_1_K": 8.6e-6,
+    "source": "Rp0,2, Rm, A : ASTM B265 (tôles, bandes et plaques, grade 5). E, ν, ρ, α : ASM Handbook, Vol. 2 (Properties of Titanium Alloys), valeurs typiques.",
+    "verified": false,
+    "notes": "Re = Rp0,2. Les propriétés physiques sont des valeurs typiques, non garanties par ASTM B265. TODO: à vérifier — toutes les valeurs, et α (plage de température)."
+  }
+]

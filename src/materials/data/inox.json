@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1-4301-c",
+    "name": "1.4301 (X5CrNi18-10)",
+    "family": "acier inoxydable austénitique",
+    "standard": "EN 10088-2",
+    "condition": "bande laminée à froid (C), t ≤ 8 mm, hypertrempé",
+    "E_Pa": 200e9,
+    "nu": 0.3,
+    "rho_kg_m3": 7900,
+    "Re_Pa": 230e6,
+    "Rm_Pa": 540e6,
+    "A_percent": 45,
+    "alpha_1_K": 16e-6,
+    "thicknessRange_m": [0, 0.008],
+    "source": "Rp0,2, Rm, A : EN 10088-2:2014 (forme de produit C). E, ρ, α : EN 10088-1:2014, annexe informative (propriétés physiques). ν : EN 1993-1-4.",
+    "verified": false,
+    "notes": "Re = Rp0,2 (pas de palier). Rm = minimum de la plage 540–750 MPa. α moyen entre 20 et 100 °C. TODO: à vérifier — annexe et tableau de EN 10088-1, et paragraphe de EN 1993-1-4 pour ν."
+  },
+  {
+    "id": "1-4404-c",
+    "name": "1.4404 (X2CrNiMo17-12-2)",
+    "family": "acier inoxydable austénitique",
+    "standard": "EN 10088-2",
+    "condition": "bande laminée à froid (C), t ≤ 8 mm, hypertrempé",
+    "E_Pa": 200e9,
+    "nu": 0.3,
+    "rho_kg_m3": 8000,
+    "Re_Pa": 240e6,
+    "Rm_Pa": 530e6,
+    "A_percent": 40,
+    "alpha_1_K": 16e-6,
+    "thicknessRange_m": [0, 0.008],
+    "source": "Rp0,2, Rm, A : EN 10088-2:2014 (forme de produit C). E, ρ, α : EN 10088-1:2014, annexe informative (propriétés physiques). ν : EN 1993-1-4.",
+    "verified": false,
+    "notes": "Re = Rp0,2 (pas de palier). Rm = minimum de la plage 530–680 MPa. α moyen entre 20 et 100 °C. TODO: à vérifier — annexe et tableau de EN 10088-1, et paragraphe de EN 1993-1-4 pour ν."
+  }
+]

@@ -1,0 +1,33 @@
+[
+  {
+    "id": "en-gjl-250",
+    "name": "EN-GJL-250",
+    "family": "fonte à graphite lamellaire",
+    "standard": "EN 1561",
+    "condition": "brut de coulée, éprouvette coulée séparément",
+    "E_Pa": 103e9,
+    "nu": 0.26,
+    "rho_kg_m3": 7200,
+    "Rm_Pa": 250e6,
+    "source": "Rm : EN 1561:2011 (éprouvette coulée séparément). E, ν, ρ : EN 1561:2011, annexe informative (propriétés typiques).",
+    "verified": false,
+    "notes": "Matériau fragile, sans limite élastique : Re non renseigné, utiliser un critère de rupture adapté (pas von Mises). Rm = minimum de la plage 250–350 MPa ; il dépend de l'épaisseur de paroi de la pièce. E = borne basse de la plage 103–118 GPa (choix prudent pour les flèches). α non renseigné. TODO: à vérifier — annexe et tableau de EN 1561."
+  },
+  {
+    "id": "en-gjs-400-15",
+    "name": "EN-GJS-400-15",
+    "family": "fonte à graphite sphéroïdal",
+    "standard": "EN 1563",
+    "condition": "éprouvette coulée séparément",
+    "E_Pa": 169e9,
+    "nu": 0.275,
+    "rho_kg_m3": 7100,
+    "Re_Pa": 250e6,
+    "Rm_Pa": 400e6,
+    "A_percent": 15,
+    "alpha_1_K": 12.5e-6,
+    "source": "Rp0,2, Rm, A : EN 1563:2018 (éprouvette coulée séparément). E, ν, ρ, α : EN 1563:2018, annexe informative (propriétés typiques).",
+    "verified": false,
+    "notes": "Re = Rp0,2. Les valeurs garanties dépendent de l'épaisseur de paroi déterminante. TODO: à vérifier — annexe et tableau de EN 1563, et α (plage de température)."
+  }
+]
