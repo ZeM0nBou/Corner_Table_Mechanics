@@ -18,8 +18,8 @@ const MODULES: readonly ModuleEntry[] = [
     route: 'sections',
   },
   {
-    name: 'Poutres isostatiques',
-    description: 'Réactions, V, M, flèche — console, deux appuis, porte-à-faux',
+    name: 'Poutres',
+    description: 'Réactions, V, M, flèche — appuis et encastrements libres, poids propre',
     route: 'poutres',
   },
   { name: 'Contraintes et critères', description: 'von Mises, Tresca, sécurité' },

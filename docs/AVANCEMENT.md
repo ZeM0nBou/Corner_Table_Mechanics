@@ -16,17 +16,22 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 | 2ter. Aide au choix des matériaux                   | ✅         | Indice de prix (€ à €€€€€), aptitude à 17 procédés, secteurs, emplois, atouts et limites                                                                    |
 | 3. Sections                                         | ✅         | 8 formes paramétriques, schéma coté, résultats avec formules LaTeX et application numérique                                                                 |
 | 3bis. Catalogue de profilés (IPE, HEA, HEB, UPN, L) | ⏳ à faire | —                                                                                                                                                           |
-| 4. Poutres isostatiques                             | ✅         | Console, deux appuis avec porte-à-faux ; forces, couples, charges réparties linéaires ; réactions, V, M, rotation, flèche ; diagrammes SVG                  |
+| 4. Poutres (isostatiques et hyperstatiques)         | ✅         | Appuis et encastrements en nombre libre ; forces, couples, charges réparties linéaires, poids propre ; réactions, V, M, rotation, flèche ; diagrammes SVG   |
 | 5 à 8                                               | ⏳ à faire | Contraintes, flambement, partage par URL et export PDF, modules complémentaires                                                                             |
 
-**Qualité :** 383 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
+**Qualité :** 398 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
 
 ### Pages de l'application
 
 - **Accueil :** liste des modules et hypothèses par défaut.
 - **Matériaux (`#/materiaux`) :** liste avec recherche (nom, norme, état, secteur, atouts), familles repliables, matériaux personnalisés en grisé dans leur famille. La fiche affiche les propriétés avec unités au choix, l'aide au choix, la source et les badges « non vérifié » et « personnalisé ». Formulaire de création contrôlé champ par champ ; import et export JSON.
 - **Sections (`#/sections`) :** rectangle plein ou creux, rond, tube, profilés I/H, U, L, T. Schéma coté à l'échelle, cotes avec unités, choix facultatif d'un matériau pour la masse linéique. Résultats : A, G, Iy, Iz, Wel, Wpl, i, J, Av, plus les axes principaux pour la cornière. Formule et application numérique avec leur source sous chaque résultat (bouton ƒ, ou « Toutes / Aucune »).
-- **Poutres (`#/poutres`) :** poutre sur deux appuis (porte-à-faux réglables) ou console encastrée à gauche ou à droite. Charges en liste : force ponctuelle, couple, charge uniforme, charge linéaire (triangle, trapèze), sur toute la longueur ou partielle. Rigidité : E du matériau ou saisi, I d'une section paramétrique ou saisi ; sans EI, seuls les réactions, V et M sont donnés. Résultats : réactions, |V|max, |M|max, flèche maximale, L/δ, rotation maximale, avec leur abscisse. Diagrammes V, M et flèche avec lecture exacte au survol. Formule fermée (bouton ƒ) quand un cas de table est reconnu ; volet « Détail du calcul » pour la méthode et les hypothèses.
+- **Poutres (`#/poutres`) :** schéma, puis appuis, charges, section et matériau, résultats et diagrammes (les charges sont juste sous le schéma pour voir son évolution).
+  - **Appuis :** liste libre d'appuis simples et d'encastrements (A, B, C… dans l'ordre de la liste), ajout, suppression, et configurations usuelles en un clic (deux appuis, consoles, encastrée-appuyée, bi-encastrée). Les appuis placés à l'extrémité droite suivent la longueur. Poutre isostatique ou hyperstatique, signalée dans les résultats.
+  - **Charges :** force ponctuelle, couple, charge uniforme, charge linéaire (triangle, trapèze), totale ou partielle. Chaque charge a sa couleur (palette catégorielle à 8 teintes, vérifiée pour les daltonismes) et son numéro, sur le schéma et dans la liste ; la couleur suit la charge quand une autre est supprimée.
+  - **Poids propre :** activé par défaut, q = ρ·A·g₀ (ou m′·g₀ en saisie directe), dessiné en gris (« pp ») ; ignoré avec un message si le matériau ou la section manquent.
+  - **Rigidité :** E du matériau ou saisi, I d'une section paramétrique ou saisi ; sans EI, seuls les réactions, V et M sont donnés.
+  - **Résultats :** réactions et couples d'encastrement, |V|max, |M|max, flèche maximale, L/δ, rotation maximale, avec leur abscisse. Diagrammes V, M et flèche (toutes charges cumulées) avec lecture exacte au survol. Formule fermée (bouton ƒ) quand un cas de table est reconnu ; volet « Détail du calcul ».
 
 ---
 
@@ -91,14 +96,14 @@ beamExtrema(sol): BeamExtrema          // min et max de V, M, θ, w avec leur ab
 sampleBeam(sol, nbPoints?): BeamSample[]  // points doublés aux discontinuités
 combineSolutions([{ solution, factor }]): BeamSolution  // superposition de cas
 classifyBeam(model) · validateBeamModel(model) · loadTerms(model) · breakpoints(sol)
-BEAM_SOURCES · BEAM_ASSUMPTIONS
+BEAM_SOURCES · BEAM_ASSUMPTIONS · selfWeight_N_m(m′) · STANDARD_GRAVITY_m_s2
 ```
 
 - **Modèle :** `{ length_m, EI_Nm2?, supports, loads }`.
   - Appuis à position libre : `appui` (w = 0) ou `encastrement` (w = 0 et θ = 0).
   - Charges : `ponctuelle` (x, Fz), `couple` (x, C), `repartie` (x1, x2, q1, q2, variation linéaire).
 - **Méthode :** fonctions de singularité (Macaulay). Chaque charge ou réaction est un terme c·⟨x − a⟩ⁿ, intégré exactement. Les inconnues (réactions, EI·θ₀, EI·w₀) viennent d'un système linéaire (équilibre + conditions aux appuis) résolu par pivot de Gauss, adimensionné par L. EI constant n'intervient pas dans le système.
-- **Hyperstatique :** le solveur le traite déjà (testé : encastrée-appuyée, bi-encastrée, deux travées). Il est refusé par défaut ; `allowHyperstatic: true` le débloque. L'UI ne l'expose pas encore.
+- **Hyperstatique :** le solveur le traite déjà (testé : encastrée-appuyée, bi-encastrée, deux travées). Il est refusé par défaut ; `allowHyperstatic: true` le débloque, ce que fait l'UI.
 - **Superposition :** la solution est une liste de termes, donc additionnable et pondérable par `combineSolutions` sans recalcul (même longueur, même EI, mêmes appuis).
 - **Extremums :** valeurs aux bornes de chaque tronçon et aux zéros de la dérivée (q pour V, V pour M, M pour θ, θ pour w), trouvés par dichotomie.
 - **Sans effort normal :** articulation et appui à rouleau sont confondus.
@@ -160,11 +165,12 @@ BEAM_SOURCES · BEAM_ASSUMPTIONS
 - **Euler-Bernoulli :** la flèche due à l'effort tranchant est négligée (poutres courtes sous-estimées).
 - **EI constant** sur toute la longueur ; flexion plane autour de y, sans effort normal ni torsion.
 - **Pas d'appui élastique, de rotule interne ni de tassement imposé.**
-- **UI limitée à l'isostatique :** deux appuis ou un encastrement en bout. Le solveur accepte d'autres configurations, non exposées.
+- **Poids propre :** g₀ conventionnel (9,806 65 m/s²) ; congés des profilés négligés, donc A et le poids légèrement sous-estimés. Avec le poids propre, une poutre a deux charges : aucun cas de table n'est alors reconnu pour la formule fermée.
+- **Schéma :** il n'est pas dessiné quand les données sont invalides ou que la poutre est un mécanisme (appuis insuffisants) ; seul le message d'erreur s'affiche. Au-delà de 8 charges, les couleurs se répètent (le numéro reste distinct).
 - **Formules fermées affichées pour 7 cas de table seulement** (une seule charge) ; les autres chargements n'affichent que la méthode générale, sans expression de M(x) par tronçon.
 - **Extremums :** deux zéros distants de moins de 1/32 de tronçon peuvent être manqués.
 - **Rapport L/δ :** calculé avec la longueur totale, y compris pour une console ou un porte-à-faux.
-- **Pas de vérification de contrainte** (étape 5) ni de poids propre automatique.
+- **Pas de vérification de contrainte** (étape 5).
 
 ### Application
 
@@ -209,6 +215,6 @@ BEAM_SOURCES · BEAM_ASSUMPTIONS
 ### Développement
 
 - [ ] **Étape 3bis :** catalogue IPE, HEA, HEB, UPN et cornières, valeurs sourcées (ArcelorMittal, EN 10365) en `verified: false`.
-- [ ] **Poutres, suites possibles :** exposer l'hyperstatique dans l'UI, cas de charge pondérés (`combineSolutions`), poids propre depuis le matériau et la section, expression de M(x) par tronçon.
+- [ ] **Poutres, suites possibles :** cas de charge pondérés (`combineSolutions`, ex. 1,35 G + 1,5 Q), expression de M(x) par tronçon, schéma affiché même en cas d'erreur.
 - [ ] **Étapes 5 à 8 :** contraintes et critères, flambement d'Euler, partage par URL et export PDF, modules complémentaires.
 - [ ] Éventuellement : tests de composants React (nécessite jsdom et Testing Library, à valider), centre de cisaillement, profilé I à semelles différentes.
