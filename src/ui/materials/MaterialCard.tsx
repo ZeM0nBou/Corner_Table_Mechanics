@@ -30,8 +30,26 @@ export function UnverifiedBadge() {
   );
 }
 
-/** Fiche détaillée d'un matériau. Les `key` des QuantityValue réinitialisent l'unité par matériau. */
-export function MaterialCard({ material: m }: { material: Material }) {
+export function CustomBadge() {
+  return (
+    <span
+      title="Matériau créé ou importé par l'utilisateur, stocké dans ce navigateur."
+      className="inline-flex items-center rounded-full border border-sky-300 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-800"
+    >
+      personnalisé
+    </span>
+  );
+}
+
+interface MaterialCardProps {
+  material: Material;
+  isCustom?: boolean;
+  /** Boutons d'action affichés sous l'en-tête. */
+  actions?: ReactNode;
+}
+
+/** Fiche détaillée d'un matériau. Donner une `key` par matériau pour réinitialiser les unités. */
+export function MaterialCard({ material: m, isCustom = false, actions }: MaterialCardProps) {
   return (
     <article className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
       <header className="flex flex-wrap items-start justify-between gap-2">
@@ -43,8 +61,12 @@ export function MaterialCard({ material: m }: { material: Material }) {
             {m.condition && <> · {m.condition}</>}
           </p>
         </div>
-        {!m.verified && <UnverifiedBadge />}
+        <div className="flex gap-1.5">
+          {isCustom && <CustomBadge />}
+          {!m.verified && <UnverifiedBadge />}
+        </div>
       </header>
+      {actions && <div className="no-print mt-3 flex flex-wrap gap-2">{actions}</div>}
 
       <dl className="mt-4">
         <Row label="Module d’Young" symbol="E">

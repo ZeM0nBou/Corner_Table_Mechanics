@@ -1,8 +1,10 @@
 import { useId } from 'react';
-import { groupByFamily, type Material } from '@materials/index';
+import type { Material } from '@materials/index';
+
+export type MaterialGroups = ReadonlyArray<readonly [label: string, items: readonly Material[]]>;
 
 interface MaterialSelectProps {
-  materials: readonly Material[];
+  groups: MaterialGroups;
   value: string;
   onChange: (id: string) => void;
   label?: string;
@@ -16,15 +18,14 @@ function optionLabel(m: Material): string {
   return parts.join(' ');
 }
 
-/** Sélecteur de matériau, groupé par famille. Réutilisable dans tous les modules. */
+/** Sélecteur de matériau, groupé (personnalisés, puis familles). Réutilisable dans tous les modules. */
 export function MaterialSelect({
-  materials,
+  groups,
   value,
   onChange,
   label = 'Matériau',
 }: MaterialSelectProps) {
   const id = useId();
-  const groups = groupByFamily(materials);
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-sm font-medium text-slate-700">
@@ -36,15 +37,17 @@ export function MaterialSelect({
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:border-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-600/30"
       >
-        {[...groups].map(([family, items]) => (
-          <optgroup key={family} label={family}>
-            {items.map((m) => (
-              <option key={m.id} value={m.id}>
-                {optionLabel(m)}
-              </option>
-            ))}
-          </optgroup>
-        ))}
+        {groups
+          .filter(([, items]) => items.length > 0)
+          .map(([group, items]) => (
+            <optgroup key={group} label={group}>
+              {items.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {optionLabel(m)}
+                </option>
+              ))}
+            </optgroup>
+          ))}
       </select>
     </div>
   );
