@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+/* Impression (export PDF) : feuille minimale, enrichie à l'étape 7. */
+@media print {
+  @page {
+    margin: 15mm;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
