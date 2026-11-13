@@ -11,7 +11,81 @@
     "Rm_Pa": 250e6,
     "source": "Rm : EN 1561:2011 (éprouvette coulée séparément). E, ν, ρ : EN 1561:2011, annexe informative (propriétés typiques).",
     "verified": false,
-    "notes": "Matériau fragile, sans limite élastique : Re non renseigné, utiliser un critère de rupture adapté (pas von Mises). Rm = minimum de la plage 250–350 MPa ; il dépend de l'épaisseur de paroi de la pièce. E = borne basse de la plage 103–118 GPa (choix prudent pour les flèches). α non renseigné. Recoupé (nov. 2026) : E 103–118 GPa, ν 0,24–0,26, ρ 7,20 g/cm³ confirmés par des fiches secondaires (KIPP, mfgrobots). TODO: à vérifier — annexe et tableau de EN 1561."
+    "notes": "Matériau fragile, sans limite élastique : Re non renseigné, utiliser un critère de rupture adapté (pas von Mises). Rm = minimum de la plage 250–350 MPa ; il dépend de l'épaisseur de paroi de la pièce. E = borne basse de la plage 103–118 GPa (choix prudent pour les flèches). α non renseigné. Recoupé (nov. 2026) : E 103–118 GPa, ν 0,24–0,26, ρ 7,20 g/cm³ confirmés par des fiches secondaires (KIPP, mfgrobots). TODO: à vérifier — annexe et tableau de EN 1561.",
+    "costIndex": 2,
+    "costNote": "Prix d’une pièce brute de fonderie, très dépendant de la masse, de la complexité et de la série ; environ 1,2–1,3 USD/kg chez un fondeur asiatique, nettement plus en Europe.",
+    "processes": {
+      "decoupeLaser": {
+        "rating": "deconseille",
+        "note": "Pièce moulée : forme obtenue directement par fonderie."
+      },
+      "jetEau": {
+        "rating": "precautions",
+        "note": "Possible pour reprendre une pièce."
+      },
+      "plasma": {
+        "rating": "precautions",
+        "note": "Possible pour reprendre une pièce ; zone affectée fragile."
+      },
+      "oxycoupage": {
+        "rating": "deconseille",
+        "note": "Impossible dans la pratique (graphite, fragilité)."
+      },
+      "usinage": {
+        "rating": "excellent",
+        "note": "Copeaux courts ; le graphite lubrifie la coupe."
+      },
+      "soudage": {
+        "rating": "deconseille",
+        "note": "Matériau fragile, fissuration ; réparation seulement, avec préchauffage et électrodes base nickel."
+      },
+      "brasage": {
+        "rating": "precautions",
+        "note": "Brasage possible pour des réparations."
+      },
+      "pliage": {
+        "rating": "deconseille",
+        "note": "Matériau fragile."
+      },
+      "emboutissage": {
+        "rating": "deconseille",
+        "note": "Matériau fragile."
+      },
+      "forgeage": {
+        "rating": "deconseille",
+        "note": "Matériau fragile."
+      },
+      "filage": {
+        "rating": "deconseille",
+        "note": "Non applicable."
+      },
+      "fonderie": {
+        "rating": "excellent",
+        "note": "Excellente coulabilité, faible retrait."
+      },
+      "fabricationAdditive": {
+        "rating": "deconseille",
+        "note": "Non usuel."
+      },
+      "traitementThermique": {
+        "rating": "precautions",
+        "note": "Recuit de détente ; trempe superficielle possible."
+      },
+      "anodisation": {
+        "rating": "deconseille",
+        "note": "Réservée à l’aluminium et au titane."
+      },
+      "galvanisation": {
+        "rating": "precautions",
+        "note": "Possible après préparation adaptée (grenaillage)."
+      },
+      "peinture": {
+        "rating": "excellent"
+      }
+    },
+    "sectors": ["mecanique", "automobile"],
+    "applicationNotes": "Bâtis de machines-outils (fort amortissement des vibrations), carters, blocs-moteurs, disques et tambours de frein, plaques de base.",
+    "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
     "id": "en-gjs-400-15",
@@ -28,6 +102,77 @@
     "alpha_1_K": 12.5e-6,
     "source": "Rp0,2, Rm, A : EN 1563:2018 (éprouvette coulée séparément). E, ν, ρ, α : EN 1563:2018, annexe informative (propriétés typiques).",
     "verified": false,
-    "notes": "Re = Rp0,2. Les valeurs garanties dépendent de l'épaisseur de paroi déterminante. Recoupé (nov. 2026) : E = 169 GPa (Total Materia) ; un fournisseur donne 155–175 GPa et ν 0,26–0,30. TODO: à vérifier — annexe et tableau de EN 1563, et α (plage de température)."
+    "notes": "Re = Rp0,2. Les valeurs garanties dépendent de l'épaisseur de paroi déterminante. Recoupé (nov. 2026) : E = 169 GPa (Total Materia) ; un fournisseur donne 155–175 GPa et ν 0,26–0,30. TODO: à vérifier — annexe et tableau de EN 1563, et α (plage de température).",
+    "costIndex": 2,
+    "costNote": "Prix d’une pièce brute de fonderie, très dépendant de la masse, de la complexité et de la série ; environ 1,3–1,4 USD/kg chez un fondeur asiatique, nettement plus en Europe.",
+    "processes": {
+      "decoupeLaser": {
+        "rating": "deconseille",
+        "note": "Pièce moulée : forme obtenue directement par fonderie."
+      },
+      "jetEau": {
+        "rating": "precautions",
+        "note": "Possible pour reprendre une pièce."
+      },
+      "plasma": {
+        "rating": "precautions",
+        "note": "Possible pour reprendre une pièce."
+      },
+      "oxycoupage": {
+        "rating": "deconseille",
+        "note": "Impossible dans la pratique."
+      },
+      "usinage": {
+        "rating": "bon"
+      },
+      "soudage": {
+        "rating": "precautions",
+        "note": "Possible avec une procédure qualifiée (électrodes base nickel, préchauffage)."
+      },
+      "brasage": {
+        "rating": "precautions",
+        "note": "Brasage possible pour des réparations."
+      },
+      "pliage": {
+        "rating": "deconseille",
+        "note": "Pièce moulée."
+      },
+      "emboutissage": {
+        "rating": "deconseille",
+        "note": "Pièce moulée."
+      },
+      "forgeage": {
+        "rating": "deconseille",
+        "note": "Non applicable."
+      },
+      "filage": {
+        "rating": "deconseille",
+        "note": "Non applicable."
+      },
+      "fonderie": {
+        "rating": "excellent"
+      },
+      "fabricationAdditive": {
+        "rating": "deconseille",
+        "note": "Non usuel."
+      },
+      "traitementThermique": {
+        "rating": "bon",
+        "note": "Recuit, normalisation ; trempe bainitique pour les fontes ADI."
+      },
+      "anodisation": {
+        "rating": "deconseille",
+        "note": "Réservée à l’aluminium et au titane."
+      },
+      "galvanisation": {
+        "rating": "bon"
+      },
+      "peinture": {
+        "rating": "excellent"
+      }
+    },
+    "sectors": ["automobile", "mecanique", "energie", "btp"],
+    "applicationNotes": "Pièces de suspension et de liaison au sol, carters, corps de vannes et robinetterie, tuyaux d’adduction d’eau, moyeux d’éoliennes.",
+    "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   }
 ]

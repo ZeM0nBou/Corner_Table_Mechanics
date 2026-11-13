@@ -14,6 +14,80 @@
     "alpha_1_K": 8.6e-6,
     "source": "Rp0,2, Rm, A : ASTM B265 (tôles, bandes et plaques, grade 5). E, ν, ρ, α : ASM Handbook, Vol. 2 (Properties of Titanium Alloys), valeurs typiques.",
     "verified": false,
-    "notes": "Re = Rp0,2. Les propriétés physiques sont des valeurs typiques, non garanties par ASTM B265. Recoupé (nov. 2026) : minima ASTM B265 état recuit 130 ksi / 120 ksi / 10 % (≈ 896 / 827 MPa) confirmés ; ρ 4,43 g/cm³ confirmé ; E varie de 110 à 120 GPa selon les sources (113,8 GPa non retrouvé). TODO: à vérifier — E et α (plage de température)."
+    "notes": "Re = Rp0,2. Les propriétés physiques sont des valeurs typiques, non garanties par ASTM B265. Recoupé (nov. 2026) : minima ASTM B265 état recuit 130 ksi / 120 ksi / 10 % (≈ 896 / 827 MPa) confirmés ; ρ 4,43 g/cm³ confirmé ; E varie de 110 à 120 GPa selon les sources (113,8 GPa non retrouvé). TODO: à vérifier — E et α (plage de température).",
+    "costIndex": 5,
+    "costNote": "Barre ou tôle : environ 20–40 USD/kg pour du lot en Asie, 60–120 USD/kg pour une qualité aéronautique ou médicale certifiée.",
+    "processes": {
+      "decoupeLaser": {
+        "rating": "bon",
+        "note": "Sous gaz inerte, sinon oxydation et fragilisation du bord de coupe."
+      },
+      "jetEau": {
+        "rating": "excellent",
+        "note": "Sans zone affectée thermiquement."
+      },
+      "plasma": {
+        "rating": "precautions",
+        "note": "Bord oxydé à reprendre."
+      },
+      "oxycoupage": {
+        "rating": "deconseille",
+        "note": "Impossible : oxydes réfractaires, le métal ne brûle pas proprement."
+      },
+      "usinage": {
+        "rating": "precautions",
+        "note": "Faible conductivité thermique : vitesses réduites, outils carbure, arrosage abondant."
+      },
+      "soudage": {
+        "rating": "bon",
+        "note": "Sous protection inerte stricte (TIG, faisceau d’électrons, laser)."
+      },
+      "brasage": {
+        "rating": "precautions",
+        "note": "Sous vide ou atmosphère protectrice."
+      },
+      "pliage": {
+        "rating": "precautions",
+        "note": "Fort retour élastique ; formage souvent à chaud."
+      },
+      "emboutissage": {
+        "rating": "precautions",
+        "note": "Formage à chaud ou superplastique."
+      },
+      "forgeage": {
+        "rating": "bon"
+      },
+      "filage": {
+        "rating": "precautions",
+        "note": "Possible mais peu courant."
+      },
+      "fonderie": {
+        "rating": "precautions",
+        "note": "Fonderie sous vide, coûteuse."
+      },
+      "fabricationAdditive": {
+        "rating": "excellent",
+        "note": "Alliage de référence en fusion laser et par faisceau d’électrons."
+      },
+      "traitementThermique": {
+        "rating": "bon",
+        "note": "Recuit, mise en solution et vieillissement."
+      },
+      "anodisation": {
+        "rating": "bon",
+        "note": "Anodisation colorée (repérage d’implants et d’instruments)."
+      },
+      "galvanisation": {
+        "rating": "deconseille",
+        "note": "Réservée aux aciers et fontes."
+      },
+      "peinture": {
+        "rating": "precautions",
+        "note": "Préparation de surface spécifique."
+      }
+    },
+    "sectors": ["aeronautique", "medical", "sport", "chimie", "naval"],
+    "applicationNotes": "Pièces de structure et de moteur aéronautique, implants orthopédiques et dentaires, sport mécanique, équipements chimiques et marins.",
+    "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   }
 ]

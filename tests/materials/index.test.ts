@@ -6,6 +6,7 @@ import {
   MaterialValidationError,
   REFERENCE_MATERIALS,
 } from '@materials/index';
+import { PROCESS_KEYS } from '@materials/selection';
 
 const fictif = {
   id: 'fictif',
@@ -146,5 +147,54 @@ describe('groupByFamily', () => {
     ]);
     expect([...g.keys()]).toEqual(['f1', 'f2']);
     expect(g.get('f1')?.map((m) => m.id)).toEqual(['a', 'c']);
+  });
+});
+
+describe('base de référence — aide au choix', () => {
+  it('chaque matériau a un indice de prix, les 17 procédés, au moins un secteur et une source', () => {
+    for (const m of REFERENCE_MATERIALS) {
+      expect(m.costIndex, m.id).toBeDefined();
+      expect(m.costNote, m.id).toBeDefined();
+      expect(Object.keys(m.processes ?? {}).sort(), m.id).toEqual([...PROCESS_KEYS].sort());
+      expect(m.sectors?.length, m.id).toBeGreaterThan(0);
+      expect(m.selectionSource, m.id).toBeDefined();
+    }
+  });
+
+  it('chaque « déconseillé » ou « précautions » est expliqué par une note', () => {
+    for (const m of REFERENCE_MATERIALS) {
+      for (const [process, aptitude] of Object.entries(m.processes ?? {})) {
+        if (aptitude.rating === 'deconseille' || aptitude.rating === 'precautions') {
+          expect(aptitude.note, `${m.id} / ${process}`).toBeDefined();
+        }
+      }
+    }
+  });
+
+  // Cohérence physique élémentaire (Ashby, ch. 14 ; métallurgie usuelle).
+  it('oxycoupage impossible hors aciers non alliés et faiblement alliés', () => {
+    for (const id of ['1-4301', '1-4404', 'en-aw-6060-t6', 'en-aw-7075-t6', 'ti-6al-4v-gr5']) {
+      expect(findMaterial(id)?.processes?.oxycoupage?.rating, id).toBe('deconseille');
+    }
+  });
+
+  it('anodisation réservée à l’aluminium et au titane', () => {
+    for (const m of REFERENCE_MATERIALS) {
+      const ok = m.family === "alliage d'aluminium" || m.family === 'alliage de titane';
+      expect(m.processes?.anodisation?.rating === 'deconseille', m.id).toBe(!ok);
+    }
+  });
+
+  it('7075 non soudable par fusion ; fontes : fonderie excellente', () => {
+    expect(findMaterial('en-aw-7075-t6')?.processes?.soudage?.rating).toBe('deconseille');
+    expect(findMaterial('en-gjl-250')?.processes?.fonderie?.rating).toBe('excellent');
+    expect(findMaterial('en-gjs-400-15')?.processes?.fonderie?.rating).toBe('excellent');
+  });
+
+  it('ordre des prix : S235 le moins cher, Ti-6Al-4V le plus cher, 316L ≥ 304', () => {
+    const cost = (id: string) => findMaterial(id)?.costIndex ?? NaN;
+    expect(cost('s235jr')).toBe(1);
+    expect(cost('ti-6al-4v-gr5')).toBe(5);
+    expect(cost('1-4404')).toBeGreaterThanOrEqual(cost('1-4301'));
   });
 });

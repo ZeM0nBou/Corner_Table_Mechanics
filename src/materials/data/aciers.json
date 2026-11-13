@@ -15,7 +15,78 @@
     "thicknessRange_m": [0.003, 0.04],
     "source": "Re, Rm, A : EN 10025-2:2019 (caractéristiques mécaniques à température ambiante). E, ν, α : EN 1993-1-1:2005 §3.2.6.",
     "verified": false,
-    "notes": "Re = moyenne des minima 235 MPa (t ≤ 16 mm) et 225 MPa (16 < t ≤ 40 mm). Rm = minimum de la plage 360–510 MPa. A sur éprouvette longitudinale (L0 = 5,65√S0). ρ = valeur conventionnelle. Recoupé (nov. 2026) avec des tables secondaires (Salzgitter, ArcelorMittal, CERN). TODO: à vérifier — source de ρ (EN 1991-1-1 tab. A.4 donne 77,0 à 78,5 kN/m³)."
+    "notes": "Re = moyenne des minima 235 MPa (t ≤ 16 mm) et 225 MPa (16 < t ≤ 40 mm). Rm = minimum de la plage 360–510 MPa. A sur éprouvette longitudinale (L0 = 5,65√S0). ρ = valeur conventionnelle. Recoupé (nov. 2026) avec des tables secondaires (Salzgitter, ArcelorMittal, CERN). TODO: à vérifier — source de ρ (EN 1991-1-1 tab. A.4 donne 77,0 à 78,5 kN/m³).",
+    "costIndex": 1,
+    "costNote": "Tôle forte : environ 0,7–0,9 €/kg départ usine (Europe, 2026) ; quelques €/kg au plus en négoce.",
+    "processes": {
+      "decoupeLaser": {
+        "rating": "excellent",
+        "note": "Procédé courant pour la tôlerie fine et moyenne."
+      },
+      "jetEau": {
+        "rating": "bon",
+        "note": "Sans zone affectée thermiquement, mais lent sur fortes épaisseurs."
+      },
+      "plasma": {
+        "rating": "excellent"
+      },
+      "oxycoupage": {
+        "rating": "excellent",
+        "note": "Procédé de référence pour les fortes épaisseurs."
+      },
+      "usinage": {
+        "rating": "bon"
+      },
+      "soudage": {
+        "rating": "excellent",
+        "note": "Soudable par tous les procédés usuels."
+      },
+      "brasage": {
+        "rating": "bon"
+      },
+      "pliage": {
+        "rating": "excellent",
+        "note": "Respecter les rayons de pliage minimaux."
+      },
+      "emboutissage": {
+        "rating": "precautions",
+        "note": "Possible pour des formes simples ; préférer les nuances DC/DD dédiées."
+      },
+      "forgeage": {
+        "rating": "precautions",
+        "note": "Nuance non destinée au forgeage ; préférer C45 ou 42CrMo4."
+      },
+      "filage": {
+        "rating": "deconseille",
+        "note": "Non usuel pour les aciers de construction."
+      },
+      "fonderie": {
+        "rating": "deconseille",
+        "note": "Nuance de laminage ; équivalents moulés : aciers moulés EN 10293."
+      },
+      "fabricationAdditive": {
+        "rating": "deconseille",
+        "note": "Pas de poudre courante pour cette nuance ; voir aciers maraging ou 17-4PH."
+      },
+      "traitementThermique": {
+        "rating": "precautions",
+        "note": "Non trempant ; détensionnement ou normalisation seulement."
+      },
+      "anodisation": {
+        "rating": "deconseille",
+        "note": "Réservée à l’aluminium et au titane."
+      },
+      "galvanisation": {
+        "rating": "bon",
+        "note": "Courante ; l’aspect dépend de la teneur en Si et P (EN ISO 1461)."
+      },
+      "peinture": {
+        "rating": "excellent"
+      }
+    },
+    "sectors": ["btp", "mecanique"],
+    "applicationNotes": "Charpente métallique, chaudronnerie, serrurerie, bâtis et châssis mécano-soudés.",
+    "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
     "id": "s275jr",
@@ -33,7 +104,78 @@
     "thicknessRange_m": [0.003, 0.04],
     "source": "Re, Rm, A : EN 10025-2:2019 (caractéristiques mécaniques à température ambiante). E, ν, α : EN 1993-1-1:2005 §3.2.6.",
     "verified": false,
-    "notes": "Re = moyenne des minima 275 MPa (t ≤ 16 mm) et 265 MPa (16 < t ≤ 40 mm). Rm = minimum de la plage 410–560 MPa. A sur éprouvette longitudinale. Recoupé (nov. 2026) avec des tables secondaires. TODO: à vérifier — Re 16–40 mm et A non confirmés par une source primaire."
+    "notes": "Re = moyenne des minima 275 MPa (t ≤ 16 mm) et 265 MPa (16 < t ≤ 40 mm). Rm = minimum de la plage 410–560 MPa. A sur éprouvette longitudinale. Recoupé (nov. 2026) avec des tables secondaires. TODO: à vérifier — Re 16–40 mm et A non confirmés par une source primaire.",
+    "costIndex": 1,
+    "costNote": "Tôle forte : environ 0,7–0,9 €/kg départ usine (Europe, 2026) ; quelques €/kg au plus en négoce.",
+    "processes": {
+      "decoupeLaser": {
+        "rating": "excellent",
+        "note": "Procédé courant pour la tôlerie fine et moyenne."
+      },
+      "jetEau": {
+        "rating": "bon",
+        "note": "Sans zone affectée thermiquement, mais lent sur fortes épaisseurs."
+      },
+      "plasma": {
+        "rating": "excellent"
+      },
+      "oxycoupage": {
+        "rating": "excellent",
+        "note": "Procédé de référence pour les fortes épaisseurs."
+      },
+      "usinage": {
+        "rating": "bon"
+      },
+      "soudage": {
+        "rating": "excellent",
+        "note": "Soudable par tous les procédés usuels."
+      },
+      "brasage": {
+        "rating": "bon"
+      },
+      "pliage": {
+        "rating": "excellent",
+        "note": "Respecter les rayons de pliage minimaux."
+      },
+      "emboutissage": {
+        "rating": "precautions",
+        "note": "Possible pour des formes simples ; préférer les nuances DC/DD dédiées."
+      },
+      "forgeage": {
+        "rating": "precautions",
+        "note": "Nuance non destinée au forgeage ; préférer C45 ou 42CrMo4."
+      },
+      "filage": {
+        "rating": "deconseille",
+        "note": "Non usuel pour les aciers de construction."
+      },
+      "fonderie": {
+        "rating": "deconseille",
+        "note": "Nuance de laminage ; équivalents moulés : aciers moulés EN 10293."
+      },
+      "fabricationAdditive": {
+        "rating": "deconseille",
+        "note": "Pas de poudre courante pour cette nuance ; voir aciers maraging ou 17-4PH."
+      },
+      "traitementThermique": {
+        "rating": "precautions",
+        "note": "Non trempant ; détensionnement ou normalisation seulement."
+      },
+      "anodisation": {
+        "rating": "deconseille",
+        "note": "Réservée à l’aluminium et au titane."
+      },
+      "galvanisation": {
+        "rating": "bon",
+        "note": "Courante ; l’aspect dépend de la teneur en Si et P (EN ISO 1461)."
+      },
+      "peinture": {
+        "rating": "excellent"
+      }
+    },
+    "sectors": ["btp", "mecanique"],
+    "applicationNotes": "Charpente métallique, chaudronnerie, serrurerie, bâtis et châssis mécano-soudés.",
+    "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
     "id": "s355jr",
@@ -51,7 +193,78 @@
     "thicknessRange_m": [0.003, 0.04],
     "source": "Re, Rm, A : EN 10025-2:2019 (caractéristiques mécaniques à température ambiante). E, ν, α : EN 1993-1-1:2005 §3.2.6.",
     "verified": false,
-    "notes": "Re = moyenne des minima 355 MPa (t ≤ 16 mm) et 345 MPa (16 < t ≤ 40 mm). Rm = minimum de la plage 470–630 MPa. A sur éprouvette longitudinale. Recoupé (nov. 2026) avec des tables secondaires. TODO: à vérifier — A non confirmé par une source primaire."
+    "notes": "Re = moyenne des minima 355 MPa (t ≤ 16 mm) et 345 MPa (16 < t ≤ 40 mm). Rm = minimum de la plage 470–630 MPa. A sur éprouvette longitudinale. Recoupé (nov. 2026) avec des tables secondaires. TODO: à vérifier — A non confirmé par une source primaire.",
+    "costIndex": 1,
+    "costNote": "Tôle forte : environ 0,7–0,9 €/kg départ usine (Europe, 2026) ; quelques €/kg au plus en négoce.",
+    "processes": {
+      "decoupeLaser": {
+        "rating": "excellent",
+        "note": "Procédé courant pour la tôlerie fine et moyenne."
+      },
+      "jetEau": {
+        "rating": "bon",
+        "note": "Sans zone affectée thermiquement, mais lent sur fortes épaisseurs."
+      },
+      "plasma": {
+        "rating": "excellent"
+      },
+      "oxycoupage": {
+        "rating": "excellent",
+        "note": "Procédé de référence pour les fortes épaisseurs."
+      },
+      "usinage": {
+        "rating": "bon"
+      },
+      "soudage": {
+        "rating": "bon",
+        "note": "Préchauffage possible selon épaisseur et carbone équivalent (EN 1011-2)."
+      },
+      "brasage": {
+        "rating": "bon"
+      },
+      "pliage": {
+        "rating": "bon",
+        "note": "Respecter les rayons de pliage minimaux ; variantes « C » aptes au formage à froid."
+      },
+      "emboutissage": {
+        "rating": "precautions",
+        "note": "Possible pour des formes simples ; préférer les nuances DC/DD dédiées."
+      },
+      "forgeage": {
+        "rating": "precautions",
+        "note": "Nuance non destinée au forgeage ; préférer C45 ou 42CrMo4."
+      },
+      "filage": {
+        "rating": "deconseille",
+        "note": "Non usuel pour les aciers de construction."
+      },
+      "fonderie": {
+        "rating": "deconseille",
+        "note": "Nuance de laminage ; équivalents moulés : aciers moulés EN 10293."
+      },
+      "fabricationAdditive": {
+        "rating": "deconseille",
+        "note": "Pas de poudre courante pour cette nuance ; voir aciers maraging ou 17-4PH."
+      },
+      "traitementThermique": {
+        "rating": "precautions",
+        "note": "Non trempant ; détensionnement ou normalisation seulement."
+      },
+      "anodisation": {
+        "rating": "deconseille",
+        "note": "Réservée à l’aluminium et au titane."
+      },
+      "galvanisation": {
+        "rating": "bon",
+        "note": "Courante ; l’aspect dépend de la teneur en Si et P (EN ISO 1461)."
+      },
+      "peinture": {
+        "rating": "excellent"
+      }
+    },
+    "sectors": ["btp", "mecanique", "energie", "naval"],
+    "applicationNotes": "Charpente et ouvrages d’art, grues et engins, mâts et structures d’éoliennes, construction navale, bâtis fortement chargés.",
+    "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
     "id": "c45-qt",
@@ -68,7 +281,78 @@
     "thicknessRange_m": [0, 0.04],
     "source": "Re, Rm, A : EN ISO 683-1:2018 (ex-EN 10083-2), état +QT. E, ν : valeurs génériques de l'acier, EN 1993-1-1:2005 §3.2.6.",
     "verified": false,
-    "notes": "Moyennes des classes d ≤ 16 mm (Re 490, Rm 700–850, A 14) et 16 < d ≤ 40 mm (Re 430, Rm 650–800, A 16) ; d = diamètre de la section déterminante. Rm = moyenne des minima. Écart des valeurs réelles à la moyenne : ±6,5 %. α non renseigné. Classe 16–40 mm recoupée (nov. 2026) avec une copie de EN 10083-2. TODO: à vérifier — classe d ≤ 16 mm, et pertinence de E, ν génériques."
+    "notes": "Moyennes des classes d ≤ 16 mm (Re 490, Rm 700–850, A 14) et 16 < d ≤ 40 mm (Re 430, Rm 650–800, A 16) ; d = diamètre de la section déterminante. Rm = moyenne des minima. Écart des valeurs réelles à la moyenne : ±6,5 %. α non renseigné. Classe 16–40 mm recoupée (nov. 2026) avec une copie de EN 10083-2. TODO: à vérifier — classe d ≤ 16 mm, et pertinence de E, ν génériques.",
+    "costIndex": 2,
+    "costNote": "Barre ronde chez un distributeur européen : environ 4–7 €/kg selon diamètre (2026).",
+    "processes": {
+      "decoupeLaser": {
+        "rating": "bon"
+      },
+      "jetEau": {
+        "rating": "bon",
+        "note": "Sans zone affectée thermiquement : conserve l’état trempé-revenu."
+      },
+      "plasma": {
+        "rating": "bon"
+      },
+      "oxycoupage": {
+        "rating": "precautions",
+        "note": "Durcissement et risque de fissuration en bord de coupe ; préchauffer les fortes épaisseurs."
+      },
+      "usinage": {
+        "rating": "bon",
+        "note": "Bonne usinabilité à l’état trempé-revenu."
+      },
+      "soudage": {
+        "rating": "precautions",
+        "note": "Carbone élevé : préchauffage obligatoire, risque de fissuration ; perte de l’état trempé-revenu en zone affectée."
+      },
+      "brasage": {
+        "rating": "precautions",
+        "note": "Le cycle thermique peut modifier l’état trempé-revenu."
+      },
+      "pliage": {
+        "rating": "precautions",
+        "note": "Ductilité limitée à l’état trempé-revenu ; former avant traitement."
+      },
+      "emboutissage": {
+        "rating": "deconseille",
+        "note": "Ductilité insuffisante."
+      },
+      "forgeage": {
+        "rating": "excellent",
+        "note": "Nuance de forge, livrée forgée puis traitée."
+      },
+      "filage": {
+        "rating": "deconseille",
+        "note": "Non usuel."
+      },
+      "fonderie": {
+        "rating": "deconseille",
+        "note": "Nuance de corroyage ; équivalents moulés : aciers moulés EN 10293."
+      },
+      "fabricationAdditive": {
+        "rating": "deconseille",
+        "note": "Pas de poudre courante pour cette nuance ; voir aciers maraging ou 17-4PH."
+      },
+      "traitementThermique": {
+        "rating": "excellent",
+        "note": "Trempe et revenu, trempe superficielle par induction courante."
+      },
+      "anodisation": {
+        "rating": "deconseille",
+        "note": "Réservée à l’aluminium et au titane."
+      },
+      "galvanisation": {
+        "rating": "bon"
+      },
+      "peinture": {
+        "rating": "excellent"
+      }
+    },
+    "sectors": ["mecanique", "automobile"],
+    "applicationNotes": "Arbres, axes, goupilles, pignons peu chargés, pièces trempées superficiellement.",
+    "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
     "id": "42crmo4-qt",
@@ -85,6 +369,78 @@
     "thicknessRange_m": [0, 0.04],
     "source": "Re, Rm, A : EN ISO 683-2:2018 (ex-EN 10083-3), état +QT. E, ν : valeurs génériques de l'acier, EN 1993-1-1:2005 §3.2.6.",
     "verified": false,
-    "notes": "Moyennes des classes d ≤ 16 mm (Re 900, Rm 1100–1300, A 10) et 16 < d ≤ 40 mm (Re 750, Rm 1000–1200, A 11) ; d = diamètre de la section déterminante. Rm = moyenne des minima. Écart des valeurs réelles à la moyenne : ±9 % — pour une pièce massive (d > 16 mm), Re réel minimal = 750 MPa. α non renseigné. Les deux classes ont été recoupées (nov. 2026) avec une reproduction de EN 10083-3:2006 et une fiche AUSA."
+    "notes": "Moyennes des classes d ≤ 16 mm (Re 900, Rm 1100–1300, A 10) et 16 < d ≤ 40 mm (Re 750, Rm 1000–1200, A 11) ; d = diamètre de la section déterminante. Rm = moyenne des minima. Écart des valeurs réelles à la moyenne : ±9 % — pour une pièce massive (d > 16 mm), Re réel minimal = 750 MPa. α non renseigné. Les deux classes ont été recoupées (nov. 2026) avec une reproduction de EN 10083-3:2006 et une fiche AUSA.",
+    "costIndex": 3,
+    "costNote": "Barre ronde chez un distributeur européen : environ 7–8 €/kg (2026).",
+    "processes": {
+      "decoupeLaser": {
+        "rating": "bon"
+      },
+      "jetEau": {
+        "rating": "bon",
+        "note": "Sans zone affectée thermiquement : conserve l’état trempé-revenu."
+      },
+      "plasma": {
+        "rating": "bon"
+      },
+      "oxycoupage": {
+        "rating": "precautions",
+        "note": "Durcissement et risque de fissuration en bord de coupe ; préchauffer les fortes épaisseurs."
+      },
+      "usinage": {
+        "rating": "bon",
+        "note": "Bonne usinabilité à l’état trempé-revenu."
+      },
+      "soudage": {
+        "rating": "deconseille",
+        "note": "Carbone équivalent élevé : à éviter ; sinon préchauffage, post-chauffage et procédure qualifiée."
+      },
+      "brasage": {
+        "rating": "precautions",
+        "note": "Le cycle thermique peut modifier l’état trempé-revenu."
+      },
+      "pliage": {
+        "rating": "precautions",
+        "note": "Ductilité limitée à l’état trempé-revenu ; former avant traitement."
+      },
+      "emboutissage": {
+        "rating": "deconseille",
+        "note": "Ductilité insuffisante."
+      },
+      "forgeage": {
+        "rating": "excellent",
+        "note": "Nuance de forge, livrée forgée puis traitée."
+      },
+      "filage": {
+        "rating": "deconseille",
+        "note": "Non usuel."
+      },
+      "fonderie": {
+        "rating": "deconseille",
+        "note": "Nuance de corroyage ; équivalents moulés : aciers moulés EN 10293."
+      },
+      "fabricationAdditive": {
+        "rating": "deconseille",
+        "note": "Pas de poudre courante pour cette nuance ; voir aciers maraging ou 17-4PH."
+      },
+      "traitementThermique": {
+        "rating": "excellent",
+        "note": "Trempe et revenu, trempe superficielle, nitruration."
+      },
+      "anodisation": {
+        "rating": "deconseille",
+        "note": "Réservée à l’aluminium et au titane."
+      },
+      "galvanisation": {
+        "rating": "precautions",
+        "note": "Risque de fragilisation (hydrogène, métal liquide) aux hauts niveaux de résistance."
+      },
+      "peinture": {
+        "rating": "excellent"
+      }
+    },
+    "sectors": ["mecanique", "automobile", "energie"],
+    "applicationNotes": "Arbres et pièces fortement sollicités, vilebrequins, bielles, boulonnerie haute résistance (classes 10.9 et 12.9), pièces de forage.",
+    "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   }
 ]
