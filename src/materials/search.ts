@@ -12,8 +12,10 @@ export function normalizeText(text: string): string {
 
 /**
  * Vrai si tous les mots de la requête apparaissent dans le nom, la famille,
- * l'état, la norme, l'identifiant, les secteurs ou les exemples d'emplois du
- * matériau (ordre indifférent). Une requête vide accepte tout.
+ * l'état, la norme, l'identifiant, les secteurs, les exemples d'emplois ou les
+ * atouts du matériau (ordre indifférent). Une requête vide accepte tout.
+ * Les limites ne sont pas indexées : chercher « soudable » ne doit pas
+ * renvoyer un matériau dont la limite est « non soudable ».
  */
 export function matchesQuery(m: Material, query: string): boolean {
   const tokens = normalizeText(query).split(' ').filter(Boolean);
@@ -27,6 +29,7 @@ export function matchesQuery(m: Material, query: string): boolean {
       m.id,
       ...(m.sectors ?? []).map((s) => SECTORS[s]),
       m.applicationNotes ?? '',
+      ...(m.pros ?? []),
     ].join(' '),
   );
   return tokens.every((t) => haystack.includes(t));

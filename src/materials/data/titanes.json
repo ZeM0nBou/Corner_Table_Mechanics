@@ -88,6 +88,12 @@
     },
     "sectors": ["aeronautique", "medical", "sport", "chimie", "naval"],
     "applicationNotes": "Pièces de structure et de moteur aéronautique, implants orthopédiques et dentaires, sport mécanique, équipements chimiques et marins.",
+    "pros": [
+      "Excellent rapport résistance / masse.",
+      "Remarquable tenue à la corrosion (eau de mer, milieu biologique).",
+      "Biocompatible."
+    ],
+    "cons": ["Très cher.", "Usinage difficile.", "E environ deux fois plus faible que l’acier."],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   }
 ]

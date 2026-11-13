@@ -99,6 +99,8 @@ Un fichier JSON par famille dans `src/materials/data/` (`aciers.json`, `aluminiu
   processes?: { [procédé]: { rating: "excellent" | "bon" | "precautions" | "deconseille", note?: string } },
   sectors?: string[],              // clés de SECTORS (aéronautique, médical, BTP…)
   applicationNotes?: string,       // exemples d'emplois
+  pros?: string[],                 // atouts : quelques points courts
+  cons?: string[],                 // limites : quelques points courts
   selectionSource?: string         // OBLIGATOIRE dès qu'un champ d'aide au choix est renseigné
 }
 ```

@@ -131,6 +131,31 @@ export function SelectionFields({ draft, onChange, touch, errors }: SelectionFie
           <ErrorText id={`${id}-emplois-err`} message={errors.applicationNotes} />
         </div>
 
+        {(
+          [
+            ['pros', 'Atouts', 'ex. Léger\nBonne tenue à la corrosion'],
+            ['cons', 'Limites', 'ex. Cher\nNon soudable'],
+          ] as const
+        ).map(([key, label, placeholder]) => (
+          <div key={key} className="flex flex-col gap-1">
+            <label htmlFor={`${id}-${key}`} className="text-sm text-slate-700">
+              {label} <span className="text-slate-500">(un point par ligne)</span>
+            </label>
+            <textarea
+              id={`${id}-${key}`}
+              rows={3}
+              value={draft[key]}
+              onChange={(e) => onChange({ [key]: e.target.value })}
+              onBlur={() => touch(key)}
+              placeholder={placeholder}
+              aria-invalid={errors[key] !== undefined}
+              aria-describedby={errors[key] !== undefined ? `${id}-${key}-err` : undefined}
+              className={`${inputCls} ${errors[key] !== undefined ? 'border-red-500' : ''}`}
+            />
+            <ErrorText id={`${id}-${key}-err`} message={errors[key]} />
+          </div>
+        ))}
+
         <details className="sm:col-span-2" onBlur={() => touch('processes')}>
           <summary className="cursor-pointer text-sm text-slate-700">
             Procédés de fabrication ({ratedCount} renseigné{ratedCount > 1 ? 's' : ''} sur 17)

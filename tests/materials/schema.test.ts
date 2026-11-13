@@ -110,6 +110,10 @@ describe('MaterialSchema — aide au choix (prix, procédés, secteurs)', () => 
     ['champ inconnu dans un procédé', { processes: { usinage: { rating: 'bon', x: 1 } } }],
     ['secteur inconnu', { sectors: ['cuisine'] }],
     ['secteur en double', { sectors: ['medical', 'medical'] }],
+    ['liste d’atouts vide', { pros: [] }],
+    ['atout vide', { pros: ['  '] }],
+    ['plus de 6 limites', { cons: ['a', 'b', 'c', 'd', 'e', 'f', 'g'] }],
+    ['atout trop long', { pros: ['x'.repeat(151)] }],
   ])('rejette : %s', (_label, overrides) => {
     expect(parse({ ...selection, ...overrides }).success).toBe(false);
   });
@@ -119,6 +123,8 @@ describe('MaterialSchema — aide au choix (prix, procédés, secteurs)', () => 
     ['procédés', { processes: { usinage: { rating: 'bon' } } }],
     ['secteurs', { sectors: ['btp'] }],
     ['emplois', { applicationNotes: 'charpente' }],
+    ['atouts', { pros: ['léger'] }],
+    ['limites', { cons: ['cher'] }],
   ])('exige une source quand on renseigne : %s', (_label, overrides) => {
     const r = parse(overrides);
     expect(r.success).toBe(false);

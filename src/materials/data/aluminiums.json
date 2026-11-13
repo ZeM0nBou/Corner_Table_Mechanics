@@ -88,6 +88,16 @@
     },
     "sectors": ["btp", "architecture", "automobile"],
     "applicationNotes": "Menuiserie et façades, profilés décoratifs, dissipateurs thermiques, mobilier.",
+    "pros": [
+      "Léger : environ un tiers de la masse volumique de l’acier.",
+      "Profilés complexes à bas coût.",
+      "Anodisation décorative."
+    ],
+    "cons": [
+      "Résistance faible.",
+      "E environ trois fois plus faible que l’acier : flèches plus grandes à section égale.",
+      "Forte perte de résistance en zone soudée."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1999-1-1 §6.1.6 (zone affectée thermiquement) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
@@ -176,6 +186,16 @@
     },
     "sectors": ["automobile", "ferroviaire", "naval", "mecanique", "btp"],
     "applicationNotes": "Structures soudées et boulonnées, châssis et caisses ferroviaires, remorques, mâts, pièces mécaniques usinées.",
+    "pros": [
+      "Alliage 6000 le plus résistant.",
+      "Bonne tenue à la corrosion.",
+      "Soudable et usinable."
+    ],
+    "cons": [
+      "E environ trois fois plus faible que l’acier.",
+      "Forte perte de résistance en zone soudée.",
+      "Pas de limite d’endurance nette en fatigue."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1999-1-1 §6.1.6 (zone affectée thermiquement) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
@@ -265,6 +285,15 @@
     },
     "sectors": ["aeronautique", "sport", "mecanique"],
     "applicationNotes": "Structures aéronautiques, cadres de vélo, matériel d’escalade, moules d’injection plastique, pièces mécaniques légères très sollicitées.",
+    "pros": [
+      "Résistance proche de celle des aciers pour un tiers de la masse.",
+      "Excellente usinabilité."
+    ],
+    "cons": [
+      "Non soudable par fusion.",
+      "Sensible à la corrosion sous contrainte à l’état T6 (préférer T73).",
+      "Cher."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   }
 ]

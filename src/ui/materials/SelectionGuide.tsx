@@ -46,7 +46,39 @@ function hasSelection(m: Material): boolean {
     m.costIndex !== undefined ||
     m.processes !== undefined ||
     m.sectors !== undefined ||
-    m.applicationNotes !== undefined
+    m.applicationNotes !== undefined ||
+    m.pros !== undefined ||
+    m.cons !== undefined
+  );
+}
+
+function PointList({
+  title,
+  points,
+  sign,
+  tone,
+}: {
+  title: string;
+  points: readonly string[];
+  sign: string;
+  tone: string;
+}) {
+  return (
+    <div>
+      <dt className="text-slate-600">{title}</dt>
+      <dd className="mt-0.5">
+        <ul className="space-y-0.5">
+          {points.map((p) => (
+            <li key={p} className="flex gap-1.5">
+              <span aria-hidden="true" className={`w-3 shrink-0 font-semibold ${tone}`}>
+                {sign}
+              </span>
+              <span>{p}</span>
+            </li>
+          ))}
+        </ul>
+      </dd>
+    </div>
   );
 }
 
@@ -99,6 +131,15 @@ export function SelectionGuide({ material: m }: { material: Material }) {
           <div>
             <dt className="text-slate-600">Emplois typiques</dt>
             <dd className="mt-0.5">{m.applicationNotes}</dd>
+          </div>
+        )}
+
+        {(m.pros || m.cons) && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {m.pros && (
+              <PointList title="Atouts" points={m.pros} sign="+" tone="text-emerald-700" />
+            )}
+            {m.cons && <PointList title="Limites" points={m.cons} sign="−" tone="text-red-700" />}
           </div>
         )}
       </dl>

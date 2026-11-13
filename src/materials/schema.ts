@@ -77,6 +77,18 @@ export const MaterialSchema = z
       .optional(),
     /** Exemples d'emplois typiques. */
     applicationNotes: z.string().trim().min(1).max(1000).optional(),
+    /** Atouts du matériau : quelques points courts. */
+    pros: z
+      .array(z.string().trim().min(1).max(150, 'Point trop long (150 caractères max.).'))
+      .min(1)
+      .max(6, '6 points au maximum.')
+      .optional(),
+    /** Limites du matériau : quelques points courts. */
+    cons: z
+      .array(z.string().trim().min(1).max(150, 'Point trop long (150 caractères max.).'))
+      .min(1)
+      .max(6, '6 points au maximum.')
+      .optional(),
     /** Source des indications qualitatives (prix, procédés, secteurs). */
     selectionSource: z.string().trim().min(1).max(500).optional(),
   })
@@ -90,7 +102,9 @@ export const MaterialSchema = z
       (m.costIndex === undefined &&
         m.processes === undefined &&
         m.sectors === undefined &&
-        m.applicationNotes === undefined),
+        m.applicationNotes === undefined &&
+        m.pros === undefined &&
+        m.cons === undefined),
     {
       message: 'Indiquez la source du prix, des procédés ou des secteurs.',
       path: ['selectionSource'],

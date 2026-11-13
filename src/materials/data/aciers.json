@@ -86,6 +86,16 @@
     },
     "sectors": ["btp", "mecanique"],
     "applicationNotes": "Charpente métallique, chaudronnerie, serrurerie, bâtis et châssis mécano-soudés.",
+    "pros": [
+      "Très bon marché et disponible partout.",
+      "Excellente soudabilité et aptitude au formage.",
+      "Très large gamme de tôles et de profilés."
+    ],
+    "cons": [
+      "Résistance modeste.",
+      "Corrosion : protection obligatoire (peinture, galvanisation).",
+      "Lourd (7,85 t/m³)."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
@@ -175,6 +185,11 @@
     },
     "sectors": ["btp", "mecanique"],
     "applicationNotes": "Charpente métallique, chaudronnerie, serrurerie, bâtis et châssis mécano-soudés.",
+    "pros": ["Compromis entre S235 et S355.", "Soudable et formable."],
+    "cons": [
+      "Moins courant en stock que S235 et S355.",
+      "Corrosion : protection obligatoire (peinture, galvanisation)."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
@@ -264,6 +279,15 @@
     },
     "sectors": ["btp", "mecanique", "energie", "naval"],
     "applicationNotes": "Charpente et ouvrages d’art, grues et engins, mâts et structures d’éoliennes, construction navale, bâtis fortement chargés.",
+    "pros": [
+      "Environ 50 % de limite élastique en plus que le S235, pour un faible surcoût.",
+      "Soudable ; nuance courante de la charpente moderne."
+    ],
+    "cons": [
+      "Même module E que le S235 : les flèches ne diminuent pas.",
+      "Corrosion : protection obligatoire (peinture, galvanisation).",
+      "Préchauffage possible en forte épaisseur."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
@@ -352,6 +376,16 @@
     },
     "sectors": ["mecanique", "automobile"],
     "applicationNotes": "Arbres, axes, goupilles, pignons peu chargés, pièces trempées superficiellement.",
+    "pros": [
+      "Bon compromis résistance / prix.",
+      "Bonne usinabilité.",
+      "Trempe superficielle possible (portées, cames)."
+    ],
+    "cons": [
+      "Soudabilité médiocre.",
+      "Trempabilité limitée : les caractéristiques chutent avec le diamètre.",
+      "Corrosion : protection nécessaire."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
@@ -441,6 +475,16 @@
     },
     "sectors": ["mecanique", "automobile", "energie"],
     "applicationNotes": "Arbres et pièces fortement sollicités, vilebrequins, bielles, boulonnerie haute résistance (classes 10.9 et 12.9), pièces de forage.",
+    "pros": [
+      "Très haute résistance avec une bonne ténacité.",
+      "Bonne trempabilité : convient aux pièces massives.",
+      "Nitrurable."
+    ],
+    "cons": [
+      "Non soudable en pratique.",
+      "Sensible à la fragilisation par l’hydrogène aux hauts niveaux de résistance.",
+      "Corrosion : protection nécessaire."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; EN 1011-2 (soudage des aciers ferritiques) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   }
 ]

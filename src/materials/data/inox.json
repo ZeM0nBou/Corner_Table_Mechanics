@@ -87,6 +87,16 @@
     },
     "sectors": ["agroalimentaire", "architecture", "btp", "chimie"],
     "applicationNotes": "Équipements agroalimentaires et de cuisine, éviers, cuves, façades et garde-corps, visserie courante.",
+    "pros": [
+      "Bonne tenue à la corrosion atmosphérique.",
+      "Excellente aptitude au formage et au soudage.",
+      "Aspect et hygiène (contact alimentaire)."
+    ],
+    "cons": [
+      "Sensible aux chlorures (piqûres) : préférer le 1.4404 en milieu marin.",
+      "Usinage délicat (écrouissage).",
+      "Limite élastique faible pour son prix."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
@@ -176,6 +186,16 @@
     },
     "sectors": ["chimie", "agroalimentaire", "naval", "medical"],
     "applicationNotes": "Milieux chlorurés et marins, équipements pharmaceutiques et chimiques, instruments médicaux, accastillage.",
+    "pros": [
+      "Meilleure tenue aux chlorures que le 1.4301 (molybdène).",
+      "Bas carbone : soudable sans sensibilisation à la corrosion intergranulaire.",
+      "Très employé en pharmacie et en médical."
+    ],
+    "cons": [
+      "Plus cher que le 1.4301.",
+      "Usinage délicat (écrouissage).",
+      "Corrosion caverneuse possible en eau de mer."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   }
 ]

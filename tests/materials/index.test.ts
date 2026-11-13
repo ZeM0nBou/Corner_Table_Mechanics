@@ -198,3 +198,22 @@ describe('base de référence — aide au choix', () => {
     expect(cost('1-4404')).toBeGreaterThanOrEqual(cost('1-4301'));
   });
 });
+
+describe('base de référence — atouts et limites', () => {
+  it('chaque matériau a 2 à 4 atouts et 2 à 4 limites', () => {
+    for (const m of REFERENCE_MATERIALS) {
+      expect(m.pros?.length, m.id).toBeGreaterThanOrEqual(2);
+      expect(m.pros?.length, m.id).toBeLessThanOrEqual(4);
+      expect(m.cons?.length, m.id).toBeGreaterThanOrEqual(2);
+      expect(m.cons?.length, m.id).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it('les limites sont cohérentes avec les procédés : un matériau « non soudable » a soudage déconseillé', () => {
+    for (const m of REFERENCE_MATERIALS) {
+      if (m.cons?.some((c) => /non soudable/i.test(c))) {
+        expect(m.processes?.soudage?.rating, m.id).toBe('deconseille');
+      }
+    }
+  });
+});

@@ -3,6 +3,7 @@ import {
   buildMaterial,
   draftFromMaterial,
   emptyDraft,
+  splitLines,
   visibleErrors,
   type DraftErrors,
   type DraftField,
@@ -174,5 +175,44 @@ describe('aide au choix dans le formulaire', () => {
     expect(visibleErrors(errors, new Set<DraftField>(['costIndex']), false)).toEqual(errors);
     expect(visibleErrors(errors, new Set<DraftField>(['sectors']), false)).toEqual(errors);
     expect(visibleErrors(errors, new Set<DraftField>(['name']), false)).toEqual({});
+  });
+});
+
+describe('atouts et limites (un point par ligne)', () => {
+  it('découpe les lignes, retire les puces et ignore les lignes vides', () => {
+    expect(splitLines('- Léger\n\n• Cher  \r\n  * Soudable\n')).toEqual([
+      'Léger',
+      'Cher',
+      'Soudable',
+    ]);
+    expect(splitLines('   \n')).toEqual([]);
+  });
+
+  it('aller-retour matériau → brouillon → matériau', () => {
+    const m: Material = {
+      id: 'perso-pc',
+      name: 'PC',
+      family: 'test',
+      E_Pa: 70e9,
+      nu: 0.33,
+      rho_kg_m3: 2700,
+      source: 'Valeurs fictives',
+      verified: false,
+      pros: ['Léger', 'Bon marché'],
+      cons: ['Mou'],
+      selectionSource: 'Source fictive',
+    };
+    expect(buildMaterial(draftFromMaterial(m), m.id)).toEqual({ ok: true, material: m });
+  });
+
+  it('exige la source dès qu’un atout est saisi, et l’affiche dès que le champ est quitté', () => {
+    const r = buildMaterial({ ...valid(), pros: 'Léger' }, 'perso-x');
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.errors.selectionSource).toBeDefined();
+      expect(visibleErrors(r.errors, new Set<DraftField>(['pros']), false).selectionSource).toBe(
+        r.errors.selectionSource,
+      );
+    }
   });
 });

@@ -18,6 +18,10 @@ export interface MaterialDraft {
   costNote: string;
   sectors: SectorKey[];
   applicationNotes: string;
+  /** Atouts, un point par ligne. */
+  pros: string;
+  /** Limites, un point par ligne. */
+  cons: string;
   processes: Partial<Record<ProcessKey, ProcessDraft>>;
   selectionSource: string;
 
@@ -64,6 +68,8 @@ export function emptyDraft(): MaterialDraft {
     costNote: '',
     sectors: [],
     applicationNotes: '',
+    pros: '',
+    cons: '',
     processes: {},
     selectionSource: '',
   };
@@ -91,6 +97,8 @@ export function draftFromMaterial(m: Material): MaterialDraft {
     costNote: m.costNote ?? '',
     sectors: [...(m.sectors ?? [])],
     applicationNotes: m.applicationNotes ?? '',
+    pros: (m.pros ?? []).join('\n'),
+    cons: (m.cons ?? []).join('\n'),
     processes: Object.fromEntries(
       Object.entries(m.processes ?? {}).map(([k, v]) => [
         k,
@@ -127,7 +135,15 @@ const LINKED: Partial<Record<DraftField, readonly DraftField[]>> = {
   tMin_m: ['tMax_m'],
   tMax_m: ['tMin_m'],
   // La source devient obligatoire dès qu'une indication d'aide au choix est saisie.
-  selectionSource: ['costIndex', 'costNote', 'sectors', 'applicationNotes', 'processes'],
+  selectionSource: [
+    'costIndex',
+    'costNote',
+    'sectors',
+    'applicationNotes',
+    'pros',
+    'cons',
+    'processes',
+  ],
 };
 
 /**
@@ -146,6 +162,14 @@ export function visibleErrors(
     if (touched.has(field) || linked.some((f) => touched.has(f))) visible[field] = message;
   }
   return visible;
+}
+
+/** Découpe une saisie « un point par ligne » ; ignore les lignes vides et les puces saisies. */
+export function splitLines(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((l) => l.replace(/^\s*[-•*+−]\s*/, '').trim())
+    .filter((l) => l !== '');
 }
 
 export type BuildResult = { ok: true; material: Material } | { ok: false; errors: DraftErrors };
@@ -184,6 +208,10 @@ export function buildMaterial(draft: MaterialDraft, id: string): BuildResult {
   }
   if (draft.costIndex !== undefined) candidate.costIndex = draft.costIndex;
   if (draft.sectors.length > 0) candidate.sectors = draft.sectors;
+  for (const k of ['pros', 'cons'] as const) {
+    const points = splitLines(draft[k]);
+    if (points.length > 0) candidate[k] = points;
+  }
   const processes = Object.entries(draft.processes).map(([k, p]) => {
     const note = p.note.trim();
     return [k, note === '' ? { rating: p.rating } : { rating: p.rating, note }] as const;

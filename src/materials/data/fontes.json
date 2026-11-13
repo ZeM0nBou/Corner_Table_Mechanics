@@ -85,6 +85,16 @@
     },
     "sectors": ["mecanique", "automobile"],
     "applicationNotes": "Bâtis de machines-outils (fort amortissement des vibrations), carters, blocs-moteurs, disques et tambours de frein, plaques de base.",
+    "pros": [
+      "Formes complexes obtenues directement par fonderie.",
+      "Excellent amortissement des vibrations.",
+      "Usinage facile et coût faible."
+    ],
+    "cons": [
+      "Fragile : allongement quasi nul.",
+      "Résistance en traction faible, bien meilleure en compression.",
+      "Non soudable."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   },
   {
@@ -173,6 +183,15 @@
     },
     "sectors": ["automobile", "mecanique", "energie", "btp"],
     "applicationNotes": "Pièces de suspension et de liaison au sol, carters, corps de vannes et robinetterie, tuyaux d’adduction d’eau, moyeux d’éoliennes.",
+    "pros": [
+      "Ductile (A ≈ 15 %), contrairement à la fonte grise.",
+      "Formes complexes à coût modéré."
+    ],
+    "cons": [
+      "Module E plus faible que l’acier.",
+      "Soudage délicat.",
+      "Qualité liée à la fonderie (défauts internes possibles)."
+    ],
     "selectionSource": "Indications qualitatives : M. F. Ashby, Materials Selection in Mechanical Design, 5e éd., Butterworth-Heinemann, 2017, ch. 14 (matrices procédé–matériau) ; usages courants de la profession ; Prix : ordres de grandeur relevés en nov. 2026 (cotations Eurometal / Fastmarkets, catalogues de distributeurs), très variables selon cours et quantités."
   }
 ]
