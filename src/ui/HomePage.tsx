@@ -12,7 +12,11 @@ const MODULES: readonly ModuleEntry[] = [
     description: 'Base de référence et unités',
     route: 'materiaux',
   },
-  { name: 'Propriétés de sections', description: 'A, I, W, i, J' },
+  {
+    name: 'Propriétés de sections',
+    description: 'A, I, Wel, Wpl, i, J, Av — rectangle, rond, tube, I, U, L, T',
+    route: 'sections',
+  },
   { name: 'Poutres isostatiques', description: 'Réactions, V, M, flèche' },
   { name: 'Contraintes et critères', description: 'von Mises, Tresca, sécurité' },
   { name: 'Flambement d’Euler', description: 'Longueurs de flambement usuelles' },

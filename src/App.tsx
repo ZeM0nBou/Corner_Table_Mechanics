@@ -1,17 +1,21 @@
 import { Disclaimer } from '@ui/components/Disclaimer';
 import { HomePage } from '@ui/HomePage';
 import { MaterialsPage } from '@ui/materials/MaterialsPage';
+import { SectionsPage } from '@ui/sections/SectionsPage';
 import { useHashRoute } from '@ui/useHashRoute';
 
 const NAV = [
   { route: '', label: 'Accueil' },
   { route: 'materiaux', label: 'Matériaux' },
+  { route: 'sections', label: 'Sections' },
 ] as const;
 
 function Page({ route }: { route: string }) {
   switch (route) {
     case 'materiaux':
       return <MaterialsPage />;
+    case 'sections':
+      return <SectionsPage />;
     default:
       return <HomePage />;
   }
