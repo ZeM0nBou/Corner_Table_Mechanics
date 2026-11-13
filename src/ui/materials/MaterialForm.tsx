@@ -9,6 +9,7 @@ import {
   type DraftField,
   type MaterialDraft,
 } from './materialDraft';
+import { SelectionFields } from './SelectionFields';
 
 interface MaterialFormProps {
   title: string;
@@ -268,6 +269,13 @@ export function MaterialForm({
           {...field('tMax_m')}
         />
       </Fieldset>
+
+      <SelectionFields
+        draft={draft}
+        onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))}
+        touch={(key) => field(key).onBlur()}
+        errors={errors}
+      />
 
       <Fieldset legend="Traçabilité">
         <div className="sm:col-span-2">

@@ -3,9 +3,24 @@
  * matériau validé par le schéma Zod (avec messages d'erreur par champ).
  */
 import { MaterialSchema, type Material } from '@materials/schema';
+import type { ProcessKey, Rating, SectorKey } from '@materials/selection';
+
+/** Aptitude à un procédé en cours de saisie. */
+export interface ProcessDraft {
+  rating: Rating;
+  note: string;
+}
 
 /** Valeurs en cours de saisie. Nombres en SI : `undefined` = vide, `NaN` = saisie invalide. */
 export interface MaterialDraft {
+  // Aide au choix (facultatif)
+  costIndex: number | undefined;
+  costNote: string;
+  sectors: SectorKey[];
+  applicationNotes: string;
+  processes: Partial<Record<ProcessKey, ProcessDraft>>;
+  selectionSource: string;
+
   name: string;
   family: string;
   standard: string;
@@ -45,6 +60,12 @@ export function emptyDraft(): MaterialDraft {
     tMin_m: undefined,
     tMax_m: undefined,
     verified: false,
+    costIndex: undefined,
+    costNote: '',
+    sectors: [],
+    applicationNotes: '',
+    processes: {},
+    selectionSource: '',
   };
 }
 
@@ -66,12 +87,30 @@ export function draftFromMaterial(m: Material): MaterialDraft {
     tMin_m: m.thicknessRange_m?.[0],
     tMax_m: m.thicknessRange_m?.[1],
     verified: m.verified,
+    costIndex: m.costIndex,
+    costNote: m.costNote ?? '',
+    sectors: [...(m.sectors ?? [])],
+    applicationNotes: m.applicationNotes ?? '',
+    processes: Object.fromEntries(
+      Object.entries(m.processes ?? {}).map(([k, v]) => [
+        k,
+        { rating: v.rating, note: v.note ?? '' },
+      ]),
+    ),
+    selectionSource: m.selectionSource ?? '',
   };
 }
 
 const REQUIRED_NUMBERS = ['E_Pa', 'nu', 'rho_kg_m3'] as const;
 const OPTIONAL_NUMBERS = ['Re_Pa', 'Rm_Pa', 'A_percent', 'alpha_1_K'] as const;
-const OPTIONAL_TEXTS = ['standard', 'condition', 'notes'] as const;
+const OPTIONAL_TEXTS = [
+  'standard',
+  'condition',
+  'notes',
+  'costNote',
+  'applicationNotes',
+  'selectionSource',
+] as const;
 
 /** Champ du schéma → champ du formulaire qui porte l'erreur. */
 function fieldOf(path: readonly PropertyKey[]): DraftField {
@@ -87,6 +126,8 @@ const LINKED: Partial<Record<DraftField, readonly DraftField[]>> = {
   Rm_Pa: ['Re_Pa'],
   tMin_m: ['tMax_m'],
   tMax_m: ['tMin_m'],
+  // La source devient obligatoire dès qu'une indication d'aide au choix est saisie.
+  selectionSource: ['costIndex', 'costNote', 'sectors', 'applicationNotes', 'processes'],
 };
 
 /**
@@ -141,6 +182,13 @@ export function buildMaterial(draft: MaterialDraft, id: string): BuildResult {
   if (draft.tMin_m !== undefined && draft.tMax_m !== undefined) {
     candidate.thicknessRange_m = [draft.tMin_m, draft.tMax_m];
   }
+  if (draft.costIndex !== undefined) candidate.costIndex = draft.costIndex;
+  if (draft.sectors.length > 0) candidate.sectors = draft.sectors;
+  const processes = Object.entries(draft.processes).map(([k, p]) => {
+    const note = p.note.trim();
+    return [k, note === '' ? { rating: p.rating } : { rating: p.rating, note }] as const;
+  });
+  if (processes.length > 0) candidate.processes = Object.fromEntries(processes);
 
   const result = MaterialSchema.safeParse(candidate);
   if (result.success) return { ok: true, material: result.data };

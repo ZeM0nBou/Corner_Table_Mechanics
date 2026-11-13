@@ -130,3 +130,49 @@ describe('visibleErrors (contrôle à la sortie du champ)', () => {
     expect(visibleErrors(errors, touched(), true)).toEqual(errors);
   });
 });
+
+describe('aide au choix dans le formulaire', () => {
+  it('aller-retour complet (prix, procédés, secteurs, emplois, source)', () => {
+    const m: Material = {
+      id: 'perso-choix',
+      name: 'Choix',
+      family: 'test',
+      E_Pa: 70e9,
+      nu: 0.33,
+      rho_kg_m3: 2700,
+      source: 'Valeurs fictives',
+      verified: false,
+      costIndex: 3,
+      costNote: 'fictif',
+      processes: { usinage: { rating: 'bon' }, soudage: { rating: 'deconseille', note: 'n' } },
+      sectors: ['aeronautique'],
+      applicationNotes: 'exemples',
+      selectionSource: 'Source fictive',
+    };
+    expect(buildMaterial(draftFromMaterial(m), m.id)).toEqual({ ok: true, material: m });
+  });
+
+  it('omet les notes de procédé vides', () => {
+    const r = buildMaterial(
+      {
+        ...valid(),
+        processes: { usinage: { rating: 'bon', note: '   ' } },
+        selectionSource: 'Source fictive',
+      },
+      'perso-x',
+    );
+    expect(r.ok && r.material.processes).toEqual({ usinage: { rating: 'bon' } });
+  });
+
+  it('exige la source dès qu’un prix est indiqué', () => {
+    const r = buildMaterial({ ...valid(), costIndex: 2 }, 'perso-x');
+    expect(r.ok === false && r.errors.selectionSource).toMatch(/source/);
+  });
+
+  it('l’erreur de source s’affiche dès que le prix ou les secteurs ont été quittés', () => {
+    const errors: DraftErrors = { selectionSource: 'Indiquez la source.' };
+    expect(visibleErrors(errors, new Set<DraftField>(['costIndex']), false)).toEqual(errors);
+    expect(visibleErrors(errors, new Set<DraftField>(['sectors']), false)).toEqual(errors);
+    expect(visibleErrors(errors, new Set<DraftField>(['name']), false)).toEqual({});
+  });
+});
