@@ -32,6 +32,8 @@ export const UNITS = {
   secondMomentOfArea: { 'mm⁴': 1e-12, 'cm⁴': 1e-8, 'm⁴': 1 },
   /** Masse volumique — SI : kg/m³ (1 g/cm³ = 10⁻³ kg / 10⁻⁶ m³ = 10³ kg/m³) */
   density: { 'kg/m³': 1, 'g/cm³': 1e3 },
+  /** Masse linéique — SI : kg/m (1 g/m = 10⁻³ kg/m ; 1 g/mm = 1 kg/m) */
+  linearMass: { 'g/m': 1e-3, 'kg/m': 1 },
   /** Coefficient de dilatation thermique — SI : 1/K */
   thermalExpansion: { '1/K': 1, '10⁻⁶/K': 1e-6 },
 } as const;
@@ -52,6 +54,7 @@ export const SI_UNIT = {
   sectionModulus: 'm³',
   secondMomentOfArea: 'm⁴',
   density: 'kg/m³',
+  linearMass: 'kg/m',
   thermalExpansion: '1/K',
 } as const satisfies { [Q in Quantity]: UnitOf<Q> };
 

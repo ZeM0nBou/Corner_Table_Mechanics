@@ -24,6 +24,7 @@ describe('toSI — valeurs de référence', () => {
     ['secondMomentOfArea', 'cm⁴', 1, 1e-8],
     ['secondMomentOfArea', 'mm⁴', 1, 1e-12],
     ['density', 'g/cm³', 7.85, 7850],
+    ['linearMass', 'g/m', 7850, 7.85],
     ['thermalExpansion', '10⁻⁶/K', 12, 12e-6],
   ] as const)('%s : %d → SI', (quantity, unit, value, expected) => {
     // Cast nécessaire : it.each perd la corrélation grandeur/unité.
