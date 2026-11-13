@@ -33,8 +33,9 @@ export function SectionDrawing({ section, shape, dims }: Props) {
   const gx = X(section.yG_m);
   const gy = Y(section.zG_m);
   // Axes : dépassent la section de 18 px, sans sortir du dessin.
+  // Axes en flèches partant de G (repère), pour laisser libres les cotes à gauche et en bas.
   const yEnd = Math.min(X(W) + 18, vw - 14);
-  const zEnd = Math.max(Y(H) - 18, 14);
+  const zEnd = Math.max(Y(H) - 12, 14);
   const { alpha_rad } = section.principal;
   const inclined = Math.abs(alpha_rad) > 1e-6 && Math.abs(Math.abs(alpha_rad) - Math.PI / 2) > 1e-6;
   const principalLength = Math.min(w, h) / 2 + 14;
@@ -97,8 +98,8 @@ export function SectionDrawing({ section, shape, dims }: Props) {
 
       {/* Axes centraux orientés : y vers la droite, z vers le haut */}
       <g stroke="#475569" strokeWidth={0.9}>
-        <line x1={X(0) - 10} y1={gy} x2={yEnd} y2={gy} markerEnd="url(#fleche-axe)" />
-        <line x1={gx} y1={Y(0) + 10} x2={gx} y2={zEnd} markerEnd="url(#fleche-axe)" />
+        <line x1={gx} y1={gy} x2={yEnd} y2={gy} markerEnd="url(#fleche-axe)" />
+        <line x1={gx} y1={gy} x2={gx} y2={zEnd} markerEnd="url(#fleche-axe)" />
       </g>
       <text x={yEnd + 3} y={gy + 4} className="fill-slate-700 text-[12px] font-semibold italic">
         y
@@ -141,7 +142,13 @@ export function SectionDrawing({ section, shape, dims }: Props) {
         O
       </text>
       <circle cx={gx} cy={gy} r={3} className="fill-red-600" />
-      <text x={gx - 13} y={gy - 5} className="fill-red-700 text-[11px] font-semibold">
+      {/* À gauche de G : seule direction libre (axes y, z vers +, axes u, v en diagonale). */}
+      <text
+        x={gx - 6}
+        y={gy + 4}
+        textAnchor="end"
+        className="fill-red-700 text-[11px] font-semibold"
+      >
         G
       </text>
 
@@ -211,9 +218,9 @@ function Dimension({
           markerEnd="url(#fleche-cote)"
         />
         <text
-          x={short ? x2 + 6 : (x1 + x2) / 2}
+          x={short ? (a.labelSide === 'start' ? x1 - 6 : x2 + 6) : (x1 + x2) / 2}
           y={short ? y + 4 : a.offsetPx > 0 ? y - 5 : y + 14}
-          textAnchor={short ? 'start' : 'middle'}
+          textAnchor={short ? (a.labelSide === 'start' ? 'end' : 'start') : 'middle'}
           stroke="none"
           className={textCls}
         >

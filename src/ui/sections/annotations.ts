@@ -16,6 +16,8 @@ export type Annotation =
       at: number;
       /** Décalage de la ligne en pixels : négatif = vers le bas, 0 = sur la matière. */
       offsetPx: number;
+      /** Pour une cote courte : libellé à gauche (« start ») ou à droite (défaut). */
+      labelSide?: 'start' | 'end';
     }
   | {
       kind: 'v';
@@ -30,6 +32,13 @@ export type Annotation =
     };
 
 const OUT = 24; // décalage des cotes hors tout (px)
+
+/**
+ * Règle de lisibilité : aucune cote intérieure à la hauteur du centre de gravité,
+ * où passe l'axe y. Les épaisseurs d'âme sont cotées à 30 % de la hauteur libre,
+ * l'épaisseur du tube sur la paroi gauche (l'axe y part de G vers la droite).
+ */
+const WEB_DIM_LEVEL = 0.3;
 
 /** Cotes de la forme, à partir des dimensions saisies (m). */
 export function sectionAnnotations(
@@ -75,7 +84,16 @@ export function sectionAnnotations(
     case 'tube':
       return [
         { kind: 'h', symbol: 'D', key: 'd_m', from: 0, to: D, at: 0, offsetPx: -OUT },
-        { kind: 'h', symbol: 't', key: 't_m', from: D - t, to: D, at: D / 2, offsetPx: 0 },
+        {
+          kind: 'h',
+          symbol: 't',
+          key: 't_m',
+          from: 0,
+          to: t,
+          at: D / 2,
+          offsetPx: 0,
+          labelSide: 'start',
+        },
       ];
     case 'I':
       return [
@@ -88,7 +106,7 @@ export function sectionAnnotations(
           key: 'tw_m',
           from: (b - tw) / 2,
           to: (b + tw) / 2,
-          at: h / 2,
+          at: tf + WEB_DIM_LEVEL * (h - 2 * tf),
           offsetPx: 0,
         },
       ];
@@ -97,7 +115,15 @@ export function sectionAnnotations(
         bOut,
         hOut,
         { kind: 'v', symbol: 'tf', key: 'tf_m', from: h - tf, to: h, at: b, offsetPx: 16 },
-        { kind: 'h', symbol: 'tw', key: 'tw_m', from: 0, to: tw, at: h / 2, offsetPx: 0 },
+        {
+          kind: 'h',
+          symbol: 'tw',
+          key: 'tw_m',
+          from: 0,
+          to: tw,
+          at: tf + WEB_DIM_LEVEL * (h - 2 * tf),
+          offsetPx: 0,
+        },
       ];
     case 'L':
       return [
