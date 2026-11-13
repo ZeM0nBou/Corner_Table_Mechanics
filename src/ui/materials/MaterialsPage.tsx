@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { groupByFamily, REFERENCE_MATERIALS, type Material } from '@materials/index';
+import { REFERENCE_MATERIALS, type Material } from '@materials/index';
 import { newCustomId } from '@materials/custom';
+import { knownFamilies } from '@materials/search';
 import { Button } from '@ui/components/Button';
 import { ImportExportPanel } from './ImportExportPanel';
 import { MaterialCard } from './MaterialCard';
 import { MaterialForm } from './MaterialForm';
-import { MaterialSelect, type MaterialGroups } from './MaterialSelect';
+import { MaterialPicker } from './MaterialPicker';
 import { useCustomMaterials } from './useCustomMaterials';
 
 /** Ce qu'affiche la page : la fiche du matériau choisi, ou un formulaire. */
@@ -21,15 +22,11 @@ export function MaterialsPage() {
   const [selectedId, setSelectedId] = useState(DEFAULT_ID);
   const [mode, setMode] = useState<Mode>({ kind: 'view' });
 
-  const all = [...custom.materials, ...REFERENCE_MATERIALS];
+  const all = [...REFERENCE_MATERIALS, ...custom.materials];
   const selected = all.find((m) => m.id === selectedId) ?? REFERENCE_MATERIALS[0];
   const isCustom = (m: Material) => custom.materials.some((c) => c.id === m.id);
   const takenIds = new Set(all.map((m) => m.id));
-
-  const groups: MaterialGroups = [
-    ['Personnalisés', custom.materials],
-    ...groupByFamily(REFERENCE_MATERIALS),
-  ];
+  const families = knownFamilies(all);
 
   const startCreate = (from?: Material) =>
     setMode({
@@ -59,9 +56,10 @@ export function MaterialsPage() {
       <div>
         <h2 className="text-xl font-semibold">Matériaux</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Base de référence ({REFERENCE_MATERIALS.length} entrées) et vos matériaux personnalisés.
-          Valeurs indicatives pour le pré-dimensionnement : Re est la moyenne des tranches
-          d’épaisseur courantes, Rm la valeur minimale garantie par la norme.
+          Base de référence ({REFERENCE_MATERIALS.length} entrées) et vos matériaux personnalisés,
+          affichés en grisé dans leur famille. Valeurs indicatives pour le pré-dimensionnement : Re
+          est la moyenne des tranches d’épaisseur courantes, Rm la valeur minimale garantie par la
+          norme.
         </p>
       </div>
 
@@ -73,37 +71,44 @@ export function MaterialsPage() {
 
       {mode.kind === 'view' ? (
         <>
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="min-w-0 flex-1 basis-72">
-              <MaterialSelect groups={groups} value={selected?.id ?? ''} onChange={setSelectedId} />
+          <div className="grid gap-6 md:grid-cols-[18rem_minmax(0,1fr)]">
+            <div className="space-y-3">
+              <MaterialPicker
+                reference={REFERENCE_MATERIALS}
+                custom={custom.materials}
+                value={selected?.id ?? ''}
+                onChange={setSelectedId}
+              />
+              <Button variant="primary" onClick={() => startCreate()} className="no-print w-full">
+                Nouveau matériau
+              </Button>
             </div>
-            <Button variant="primary" onClick={() => startCreate()} className="no-print">
-              Nouveau matériau
-            </Button>
-          </div>
 
-          {selected && (
-            <MaterialCard
-              key={selected.id}
-              material={selected}
-              isCustom={isCustom(selected)}
-              actions={
-                isCustom(selected) ? (
-                  <>
-                    <Button onClick={() => setMode({ kind: 'edit', material: selected })}>
-                      Modifier
+            {selected && (
+              <MaterialCard
+                key={selected.id}
+                material={selected}
+                isCustom={isCustom(selected)}
+                actions={
+                  isCustom(selected) ? (
+                    <>
+                      <Button onClick={() => setMode({ kind: 'edit', material: selected })}>
+                        Modifier
+                      </Button>
+                      <Button onClick={() => startCreate(selected)}>Dupliquer</Button>
+                      <Button variant="danger" onClick={() => remove(selected)}>
+                        Supprimer
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={() => startCreate(selected)}>
+                      Dupliquer et personnaliser
                     </Button>
-                    <Button onClick={() => startCreate(selected)}>Dupliquer</Button>
-                    <Button variant="danger" onClick={() => remove(selected)}>
-                      Supprimer
-                    </Button>
-                  </>
-                ) : (
-                  <Button onClick={() => startCreate(selected)}>Dupliquer et personnaliser</Button>
-                )
-              }
-            />
-          )}
+                  )
+                }
+              />
+            )}
+          </div>
 
           <ImportExportPanel custom={custom.materials} onReplaceAll={custom.replaceAll} />
         </>
@@ -115,6 +120,7 @@ export function MaterialsPage() {
               title={mode.title}
               id={mode.id}
               initial={mode.initial}
+              familySuggestions={families}
               onSave={save}
               onCancel={() => setMode({ kind: 'view' })}
             />
@@ -124,6 +130,7 @@ export function MaterialsPage() {
               title={`Modifier « ${mode.material.name} »`}
               id={mode.material.id}
               initial={mode.material}
+              familySuggestions={families}
               onSave={save}
               onCancel={() => setMode({ kind: 'view' })}
             />
