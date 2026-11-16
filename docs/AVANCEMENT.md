@@ -268,7 +268,7 @@ STRESS_SOURCES · StressInputError
 2. **5b. Page Poutres**, bloc « Vérification » sous les résultats : σ traction et σ compression maximales (fibre, abscisse), τ maximal, contrainte équivalente, résistance du matériau, coefficient de sécurité avec code couleur et icône ; flèche comparée à L/limite. Formules (bouton ƒ) avec application numérique et source.
 3. **5c. Page Contraintes autonome (reste à faire)** (`#/contraintes`) : section + efforts combinés N, My, Vz, T ; σ, τ, von Mises, Tresca. À faire après 5a et 5b.
 
-### Choix par défaut (provisoires, à confirmer par le responsable du projet)
+### Décisions (confirmées par le responsable du projet le 16 novembre 2026)
 
 - **Matériau ductile** (Re renseignée : aciers, aluminiums, inox, titane, fonte GS) : contrainte équivalente de von Mises comparée à Re, signe indifférent. Coefficient de sécurité **brut** n = Re/σ_eq, sans coefficient partiel γ_M0.
 - **Matériau fragile** (Re absente, Rm seule : fonte grise EN-GJL) : contrainte principale de **traction** σ₁ comparée à Rm. La **compression n'est pas vérifiée**, faute de résistance en compression dans la base. Aucun champ `Rc_Pa` n'a été ajouté au schéma.

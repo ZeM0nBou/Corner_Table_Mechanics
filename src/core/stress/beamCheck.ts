@@ -5,7 +5,7 @@
  *
  * Conventions : voir `stress.ts` (σ > 0 en traction, M > 0 fibre inférieure tendue).
  *
- * Choix (provisoires, voir docs/AVANCEMENT.md § 5) :
+ * Choix (confirmés, voir docs/AVANCEMENT.md § 5) :
  * - matériau DUCTILE (Re connue) : von Mises comparé à Re, quel que soit le signe de σ ;
  * - matériau FRAGILE (Rm seule) : contrainte principale de traction σ₁ comparée à Rm ;
  *   la compression n'est pas vérifiée (pas de résistance en compression dans la base) ;
