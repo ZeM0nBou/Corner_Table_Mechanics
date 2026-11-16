@@ -268,7 +268,8 @@ STRESS_SOURCES · StressInputError
 - [ ] **Étape 3bis :** catalogue IPE, HEA, HEB, UPN et cornières, valeurs sourcées (ArcelorMittal, EN 10365) en `verified: false`.
 - [ ] **Poutres, suites possibles :** cas de charge pondérés (`combineSolutions`, ex. 1,35 G + 1,5 Q), expression de M(x) par tronçon, schéma affiché même en cas d'erreur.
 - [ ] **Poutres :** la flexion d’une cornière ignore Iyz (σ et flèche) ; la page Contraintes, elle, en tient compte. À aligner.
-- [ ] **Étapes 7 et 8 :** partage par URL et export PDF, modules complémentaires.
+- [ ] **Étape 7 (prochaine) :** partage par URL et export PDF, voir la section 7 ci-dessous.
+- [ ] **Étape 8 :** modules complémentaires.
 - [ ] **Flambement, suites possibles :** courbes de flambement de l’EN 1993-1-1 §6.3.1 (χ), flambement par torsion et flexion-torsion des profils ouverts, K recommandés pour encastrements imparfaits.
 - [ ] Éventuellement : tests de composants React (nécessite jsdom et Testing Library, à valider), centre de cisaillement, profilé I à semelles différentes.
 
@@ -316,7 +317,8 @@ STRESS_SOURCES · StressInputError
 - **Modèle :** Euler + Johnson (pas de courbes EC3 pour l'instant).
 - **K :** valeurs théoriques 2 ; 1 ; 0,7 ; 0,5, plus un K saisi librement ; l'UI rappelle qu'un encastrement réel n'est jamais parfait.
 - **Plans :** deux plans avec K distincts. Pour une section sans axe de symétrie (cornière), les plans sont les axes principaux u et v (choix fait lors du développement, cohérent avec la mécanique).
-- **Seuil :** même seuil réglable que les contraintes (OK à partir de 1,5). Ncr est une charge de barre parfaite : l'UI signale l'effet des imperfections aux élancements intermédiaires.
+- **Seuil :** même seuil réglable que les contraintes (OK à partir de 1,5). Ncr est une charge de barre parfaite : l'UI signale l'effet des imperfections aux élancements intermédiaires. La question d'un seuil par défaut plus élevé (2 à 3, usage courant en mécanique sans courbe d'imperfection) a été posée ; le responsable a validé l'étape telle quelle, donc 1,5 reste la valeur par défaut. À revoir si besoin.
+- **Étape 6 validée** par le responsable du projet le 16 novembre 2026 (poussée sur `main`, en ligne).
 
 ### Page (`#/flambement`)
 
@@ -327,3 +329,16 @@ Schéma des quatre cas (déformées schématiques, cas retenus surlignés), sect
 - Barre parfaite : pas d'imperfection, d'excentricité ni de contrainte résiduelle (n surestimé aux élancements moyens par rapport à l'EN 1993-1-1).
 - Flambement par flexion seul : le flambement par torsion ou flexion-torsion (L, T, U) n'est pas calculé.
 - Section constante, effort normal constant, matériau homogène.
+
+---
+
+## 7. Prochaine étape : partage par URL et export PDF (pas commencée)
+
+Points à soumettre au responsable **avant de coder** (CLAUDE.md : plan d'abord, pas de dépendance sans accord) :
+
+- **Dépendance `lz-string`** pour compresser l'état dans l'URL : à faire approuver (paquet maintenu et très utilisé ; vérifier l'orthographe exacte). Alternative sans dépendance : `CompressionStream` natif du navigateur (asynchrone, encodage base64url à écrire).
+- **Format :** un état par page (Poutres, Sections, Contraintes, Flambement), avec numéro de version du format, validé par un schéma Zod au décodage ; taille bornée avant et après décompression ; rejet propre avec message si le lien est invalide.
+- **Matériau personnalisé :** ses propriétés sont incluses dans le lien (même schéma Zod que l'import JSON) ; il n'est pas ajouté automatiquement au `localStorage` du destinataire (à confirmer).
+- **Emplacement :** module `src/share/` (encodage/décodage purs, testés), puis bouton « Copier le lien » sur chaque page.
+- **Export PDF :** impression du navigateur avec une feuille `@media print` (entrées, hypothèses, formules dépliées, résultats, sources, date) ; bouton « Exporter ».
+- **Question à poser :** paramètres dans le hash (`#/poutres?c=…`, compatible avec le routage actuel et GitHub Pages) — c'est la proposition par défaut.
