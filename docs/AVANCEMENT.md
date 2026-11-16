@@ -19,9 +19,10 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 | 4. Poutres (isostatiques et hyperstatiques)         | ✅         | Appuis et encastrements en nombre libre ; forces, couples, charges réparties linéaires, poids propre ; réactions, V, M, rotation, flèche ; diagrammes SVG   |
 | 5. Contraintes et critères                          | ✅         | Moteur (Navier, flexion composée et déviée, τ moyen, torsion par forme, von Mises, Tresca, σ₁) ; vérification dans la page Poutres ; page Contraintes       |
 | 6. Flambement                                       | ✅         | Euler et Johnson, longueurs de flambement usuelles ou K libre, deux plans (y/z ou u/v pour la cornière), coefficient de sécurité Ncr/N                      |
-| 7 et 8                                              | ⏳ à faire | Partage par URL et export PDF, modules complémentaires                                                                                                      |
+| 7. Partage + export PDF                             | ✅         | Lien compressé dans l’ancre (Sections, Poutres, Contraintes, Flambement), matériau inclus ; export PDF par l’impression, formules dépliées                  |
+| 8. Modules complémentaires                          | ⏳ à faire | —                                                                                                                                                           |
 
-**Qualité :** 505 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
+**Qualité :** 596 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
 
 ### Pages de l'application
 
@@ -54,7 +55,7 @@ src/
     stress/       stress.ts (Navier, τ, von Mises, Tresca, σ₁, n, verdict), beamCheck.ts (vérification d'une poutre), combined.ts (efforts combinés N, My, Vz, T)
   materials/      schéma Zod, données JSON, chargement, recherche, matériaux personnalisés
   ui/             composants React, un dossier par module (materials/, sections/)
-  share/          vide (prévu pour l'étape 7)
+  share/          codec.ts (compression bornée, base64url), schemas.ts (format des liens, Zod), share.ts (enveloppe, ancre), materialLink.ts (matériau partagé)
 tests/            miroir de core/, materials/ et des fonctions pures de ui/
 ```
 
@@ -217,7 +218,7 @@ STRESS_SOURCES · StressInputError
 
 - **Interface non testée automatiquement :** les composants React n'ont pas de tests (ni jsdom ni Testing Library), seules les fonctions pures de l'UI le sont. Le rendu (schéma, panneaux) se vérifie à la main.
 - **Matériaux personnalisés :** non synchronisés entre deux onglets ouverts. Il faut les exporter pour les retrouver sur un autre poste.
-- **Pas encore de partage d'un calcul par URL ni d'export PDF** (étape 7).
+- **Partage et export (étape 7) :** voir les limites de la section 7.
 - **`groupByFamily`** (`materials/index.ts`) n'est plus utilisée par l'UI, remplacée par `buildFamilyGroups`. Elle est conservée et testée.
 - **Audit npm :** 10 alertes « modérées » sur `minimatch`, uniquement dans l'outillage de lint. Les dépendances livrées au navigateur n'en ont aucune. On attend la correction en amont.
 
@@ -268,7 +269,7 @@ STRESS_SOURCES · StressInputError
 - [ ] **Étape 3bis :** catalogue IPE, HEA, HEB, UPN et cornières, valeurs sourcées (ArcelorMittal, EN 10365) en `verified: false`.
 - [ ] **Poutres, suites possibles :** cas de charge pondérés (`combineSolutions`, ex. 1,35 G + 1,5 Q), expression de M(x) par tronçon, schéma affiché même en cas d'erreur.
 - [ ] **Poutres :** la flexion d’une cornière ignore Iyz (σ et flèche) ; la page Contraintes, elle, en tient compte. À aligner.
-- [ ] **Étape 7 (prochaine) :** partage par URL et export PDF, voir la section 7 ci-dessous.
+- [ ] **Étape 7, à valider par le responsable :** partage par lien et export PDF (section 7). Suites possibles : unités d'affichage de chaque champ dans le lien, partage de la page Matériaux (fiche d'un matériau), icône du site (`/favicon.ico` en 404, sans conséquence).
 - [ ] **Étape 8 :** modules complémentaires.
 - [ ] **Flambement, suites possibles :** courbes de flambement de l’EN 1993-1-1 §6.3.1 (χ), flambement par torsion et flexion-torsion des profils ouverts, K recommandés pour encastrements imparfaits.
 - [ ] Éventuellement : tests de composants React (nécessite jsdom et Testing Library, à valider), centre de cisaillement, profilé I à semelles différentes.
@@ -332,13 +333,41 @@ Schéma des quatre cas (déformées schématiques, cas retenus surlignés), sect
 
 ---
 
-## 7. Prochaine étape : partage par URL et export PDF (pas commencée)
+## 7. Étape 7 terminée : partage par lien et export PDF (à valider)
 
-Points à soumettre au responsable **avant de coder** (CLAUDE.md : plan d'abord, pas de dépendance sans accord) :
+### Décisions (confirmées par le responsable du projet le 16 novembre 2026)
 
-- **Dépendance `lz-string`** pour compresser l'état dans l'URL : à faire approuver (paquet maintenu et très utilisé ; vérifier l'orthographe exacte). Alternative sans dépendance : `CompressionStream` natif du navigateur (asynchrone, encodage base64url à écrire).
-- **Format :** un état par page (Poutres, Sections, Contraintes, Flambement), avec numéro de version du format, validé par un schéma Zod au décodage ; taille bornée avant et après décompression ; rejet propre avec message si le lien est invalide.
-- **Matériau personnalisé :** ses propriétés sont incluses dans le lien (même schéma Zod que l'import JSON) ; il n'est pas ajouté automatiquement au `localStorage` du destinataire (à confirmer).
-- **Emplacement :** module `src/share/` (encodage/décodage purs, testés), puis bouton « Copier le lien » sur chaque page.
-- **Export PDF :** impression du navigateur avec une feuille `@media print` (entrées, hypothèses, formules dépliées, résultats, sources, date) ; bouton « Exporter ».
-- **Question à poser :** paramètres dans le hash (`#/poutres?c=…`, compatible avec le routage actuel et GitHub Pages) — c'est la proposition par défaut.
+- **Compression :** `CompressionStream('deflate-raw')` natif, sans dépendance (pas de `lz-string`).
+- **Lien :** dans l'ancre, `#/poutres?c=…` (compatible GitHub Pages ; l'ancre n'est jamais envoyée au serveur).
+- **Barre d'adresse :** non modifiée pendant la saisie ; le lien n'est fabriqué qu'au clic sur « Copier le lien ». Recharger une page ouverte par un lien revient aux valeurs du lien.
+- **Matériau de référence :** identifiant + instantané (E, ν, ρ, Re, Rm). Si la base a changé depuis, l'écart est affiché et le calcul reprend les valeurs du lien (matériau temporaire « valeurs du lien », non vérifié). Absent de la base : reconstitué depuis le lien.
+- **Matériau personnalisé :** inclus en entier ; chez le destinataire, temporaire pour ce calcul, avec un bouton « Ajouter à mes matériaux » (conflit d'identifiant : remplacer ou garder les deux, comme l'import JSON).
+
+### Format et sécurité (`src/share/`)
+
+- Enveloppe `{ v: 1, page, state }`, JSON → deflate brut → base64url. Un schéma Zod strict par page (`STATE_SCHEMAS`) ; nombres finis ; listes bornées (20 appuis, 100 charges) ; matériau personnalisé validé par `MaterialSchema`.
+- Bornes : paramètre ≤ 16 000 caractères avant décodage ; JSON ≤ 256 ko, contrôlé **pendant** la décompression (arrêt d'une « bombe »). UTF-8 strict.
+- Un champ vide ou invalide (`undefined`, `NaN`) est écrit `null` et relu vide.
+- **Compatibilité :** un lien publié doit rester lisible. Toute modification incompatible des schémas impose `SHARE_VERSION = 2` et un décodeur pour la version 1.
+- Ordre de grandeur : poutre par défaut ≈ 430 caractères de paramètre, lien complet ≈ 500.
+
+### Interface
+
+- `SharedPageLoader` décode le lien (asynchrone) avant de monter la page ; la page est remontée quand le lien change (`key`).
+- `usePageMaterial` : matériau choisi, matériaux personnalisés et matériau reçu ; `LinkNotice` : bandeau (lien lu, lien inutilisable avec message, état du matériau) ; `ShareBar` : « Copier le lien » (repli : lien affiché à copier à la main) et « Exporter (PDF) ».
+- Adaptateurs purs et testés : `sectionShare.ts`, `beamShare.ts` (identifiants d'appuis et de charges renumérotés à l'ouverture). Pages Contraintes et Flambement : correspondance directe.
+- Poutres : les seuils de la vérification (n et L/limite) sont remontés de `BeamCheck` dans la page pour être partagés.
+- **Export PDF :** le bouton déplie toutes les formules et le volet « Détail du calcul » (`PrintProvider`, contexte `expandAll`), attend le rendu KaTeX, puis appelle `window.print()` ; tout se replie à `afterprint`. En-tête imprimé : page, date et heure, avertissement, lien du calcul. Feuille `@media print` dans `index.css` (boutons d'action masqués, option choisie et sélecteur de matériau gardés, couleurs conservées, A4).
+
+### Vérification
+
+- 91 tests (codec avec vecteurs RFC 4648, liens tronqués ou forgés, bombe de décompression ; schémas ; matériau ; adaptateurs de section et de poutre).
+- Contrôlé dans Chrome (piloté par script) : copie du lien, réouverture dans un navigateur au stockage vide (longueur et seuil restaurés), liens invalides (charabia, tronqué, autre page), matériau personnalisé ajouté à mes matériaux, écart de matériau de référence affiché, PDF des pages Poutres et Sections relu.
+
+### Limites
+
+- **Unités d'affichage** de chaque champ non partagées (le destinataire voit les unités par défaut, les valeurs sont identiques) ; seule l'unité des abscisses de la page Poutres l'est.
+- Un champ contenant une saisie invalide revient vide.
+- Impression par Ctrl+P : seules les formules déjà dépliées sont imprimées (le bouton « Exporter » déplie tout) ; l'en-tête a la date mais pas le lien.
+- Page Matériaux non partageable par lien.
+- Un lien de matériau temporaire repartagé l'est comme matériau personnalisé.
