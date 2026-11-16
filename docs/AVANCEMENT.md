@@ -17,10 +17,10 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 | 3. Sections                                         | ✅          | 8 formes paramétriques, schéma coté, résultats avec formules LaTeX et application numérique                                                                 |
 | 3bis. Catalogue de profilés (IPE, HEA, HEB, UPN, L) | ⏳ à faire  | —                                                                                                                                                           |
 | 4. Poutres (isostatiques et hyperstatiques)         | ✅          | Appuis et encastrements en nombre libre ; forces, couples, charges réparties linéaires, poids propre ; réactions, V, M, rotation, flèche ; diagrammes SVG   |
-| 5. Contraintes et critères                          | 🚧 en cours | Voir § 5 : vérification de résistance et de flèche dans la page Poutres, puis page Contraintes autonome                                                     |
+| 5. Contraintes et critères                          | 🚧 en cours | 5a moteur et 5b vérification dans la page Poutres faits ; 5c page Contraintes autonome à faire (voir § 5)                                                   |
 | 6 à 8                                               | ⏳ à faire  | Flambement, partage par URL et export PDF, modules complémentaires                                                                                          |
 
-**Qualité :** 398 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
+**Qualité :** 443 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
 
 ### Pages de l'application
 
@@ -32,6 +32,7 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
   - **Charges :** force ponctuelle, couple, charge uniforme, charge linéaire (triangle, trapèze), totale ou partielle. Chaque charge a sa couleur (palette catégorielle à 8 teintes, vérifiée pour les daltonismes) et son numéro, sur le schéma et dans la liste ; la couleur suit la charge quand une autre est supprimée.
   - **Poids propre :** activé par défaut et toujours en tête de la liste des charges, q = ρ·A·g₀ (ou m′·g₀ en saisie directe), dessiné en gris (« pp ») ; ignoré avec un message si le matériau ou la section manquent.
   - **Rigidité :** E du matériau ou saisi, I d'une section paramétrique (avec le schéma coté de l'onglet Sections et un bouton ⓘ qui montre les vignettes des formes au survol) ou saisi ; sans EI, seuls les réactions, V et M sont donnés.
+  - **Vérification (étape 5b) :** contraintes de traction et de compression maximales (fibre et abscisse), cisaillement moyen τ = V/Av, contrainte équivalente (von Mises pour un matériau ductile, contrainte principale de traction pour un matériau fragile), résistance du matériau, coefficient de sécurité avec pastille OK / Limite / KO (icône et mot, seuil réglable, 1,5 par défaut), flèche comparée à L/limite (300 par défaut). Formule, application numérique et source sous chaque ligne (bouton ƒ). Indisponible en saisie directe de I ou sans matériau, avec un message.
   - **Résultats :** réactions et couples d'encastrement, |V|max, |M|max, flèche maximale, L/δ, rotation maximale, avec leur abscisse. Diagrammes V, M et flèche (toutes charges cumulées) : au-dessus de chacun, la valeur au point survolé et le min et le max avec leur abscisse ; extremums marqués sur la courbe. Formule fermée (bouton ƒ) quand un cas de table est reconnu ; volet « Détail du calcul ».
 
 ---
@@ -45,7 +46,8 @@ src/
   core/           TypeScript pur, aucune dépendance à React (règle vérifiée par ESLint)
     units.ts      conversions d'unités
     sections/     composite.ts (moteur à rectangles), shapes.ts (formes usuelles)
-    beams/        model.ts (types, validation), solver.ts (Macaulay), analysis.ts (extremums, échantillons), sources.ts
+    beams/        model.ts (types, validation), solver.ts (Macaulay), analysis.ts (extremums, échantillons), sources.ts, selfWeight.ts
+    stress/       stress.ts (Navier, τ, von Mises, Tresca, σ₁, n, verdict), beamCheck.ts (vérification d'une poutre)
   materials/      schéma Zod, données JSON, chargement, recherche, matériaux personnalisés
   ui/             composants React, un dossier par module (materials/, sections/)
   share/          vide (prévu pour l'étape 7)
@@ -55,6 +57,8 @@ tests/            miroir de core/, materials/ et des fonctions pures de ui/
 - **Alias d'import :** `@core/*`, `@materials/*`, `@ui/*`, `@share/*`.
 - **Isolation du moteur :** une règle ESLint `no-restricted-imports` interdit à `src/core/**` d'importer React ou l'UI.
 - **Navigation :** par ancre (`#/materiaux`), sans bibliothèque de routage. C'est compatible GitHub Pages, qui ne réécrit pas les URL.
+- **Chargement à la demande :** les pages Matériaux, Sections et Poutres sont chargées par `React.lazy` (paquet initial 226 kB au lieu de 504 kB) ; KaTeX l'est à la première formule.
+- **Composants partagés :** `FormulaTable` (tableau avec bouton ƒ : formule, application numérique, source), `InfoTip` (bouton ⓘ à panneau), `ShapeThumbnail` (vignette de forme de section).
 - **Fonctions pures de l'UI :** la logique testable de l'interface est sortie des composants, ce qui permet de la tester sans navigateur. Exemples : `materialDraft.ts`, `sectionForm.ts`, `annotations.ts`, `sectionFormulas.ts`, `format.ts`.
 
 ### 2.2 Types et unités
@@ -108,6 +112,22 @@ BEAM_SOURCES · BEAM_ASSUMPTIONS · selfWeight_N_m(m′) · STANDARD_GRAVITY_m_s
 - **Superposition :** la solution est une liste de termes, donc additionnable et pondérable par `combineSolutions` sans recalcul (même longueur, même EI, mêmes appuis).
 - **Extremums :** valeurs aux bornes de chaque tronçon et aux zéros de la dérivée (q pour V, V pour M, M pour θ, θ pour w), trouvés par dichotomie.
 - **Sans effort normal :** articulation et appui à rouleau sont confondus.
+
+### 2.3ter API des contraintes (`@core/stress`)
+
+```ts
+bendingStress_Pa(M, Iy, z) · extremeFibres(h, zG) · averageShearStress_Pa(V, Av)
+vonMises_Pa(σ, τ) · tresca_Pa(σ, τ) · maxPrincipalStress_Pa(σ, τ)
+safetyFactor(R, σ) · verdict(n, seuil): 'ok' | 'limite' | 'ko'
+beamStresses(input): BeamStresses          // traction et compression max (fibre, x, M), τ moyen max
+strengthBasis(matériau): ductile (Re) | fragile (Rm) | undefined
+checkBeamStrength(contraintes, base, seuil): StrengthCheck
+checkDeflection(δmax, L, limite): DeflectionCheck
+STRESS_SOURCES · StressInputError
+```
+
+- **Signe :** σ > 0 en traction ; σ(z) = −M·z/Iy, z depuis G vers le haut (M > 0 tend la fibre inférieure).
+- **Côté UI :** `beamCheckModel.ts` (`evaluateCheck`, fonction pure testée) prépare les données et les messages ; `BeamCheck.tsx` les affiche ; `beamCheckFormulas.ts` produit le LaTeX.
 
 ### 2.4 Conventions
 
@@ -171,7 +191,15 @@ BEAM_SOURCES · BEAM_ASSUMPTIONS · selfWeight_N_m(m′) · STANDARD_GRAVITY_m_s
 - **Formules fermées affichées pour 7 cas de table seulement** (une seule charge) ; les autres chargements n'affichent que la méthode générale, sans expression de M(x) par tronçon.
 - **Extremums :** deux zéros distants de moins de 1/32 de tronçon peuvent être manqués.
 - **Rapport L/δ :** calculé avec la longueur totale, y compris pour une console ou un porte-à-faux.
-- **Pas de vérification de contrainte** (étape 5).
+
+### Contraintes (étape 5b)
+
+- **Majorant :** σ_max et τ_max sont combinées même si elles ne sont pas atteintes au même point ni sur la même fibre.
+- **τ moyen sur Av :** la répartition de Jourawski n'est pas calculée (maximum réel × 1,5 dans un rectangle plein). τ n'est pas calculée pour la cornière (Av non définie).
+- **Fragile :** compression non vérifiée (pas de résistance en compression dans la base). Le critère retenu (fragile si Re absente) classe la seule EN-GJL-250 comme fragile.
+- **Non vérifiés :** déversement, voilement local, fatigue, concentrations de contraintes ; pas de coefficient partiel γ_M0.
+- **Saisie directe de I :** pas de vérification de contrainte (G, h et Av inconnus).
+- **Flèche admissible :** une seule valeur L/limite, appliquée à la longueur totale (console comprise).
 
 ### Application
 
@@ -208,6 +236,11 @@ BEAM_SOURCES · BEAM_ASSUMPTIONS · selfWeight_N_m(m′) · STANDARD_GRAVITY_m_s
 - [ ] Paragraphes de Timoshenko & Gere pour les axes principaux.
 - [ ] EN 1993-1-1 §6.2.6(3) : vérifier Av pour les barres pleines (rectangle, rond), le rectangle creux, le tube et le T.
 
+**Contraintes (`src/core/stress/`)**
+
+- [ ] Paragraphes de Timoshenko & Gere pour la formule de Navier, le critère de Tresca et les contraintes principales.
+- [ ] Paragraphe de l'EN 1990 (annexe A1.4) pour les limites de flèche.
+
 **Poutres (`src/core/beams/`)**
 
 - [ ] Numéros de cas du tableau 8.1 de Roark (8ᵉ éd.) et de l'annexe de Gere & Goodno pour les formules fermées. Les valeurs ont été recoupées par le solveur (accord à 1e-9), pas avec les ouvrages.
@@ -225,7 +258,7 @@ BEAM_SOURCES · BEAM_ASSUMPTIONS · selfWeight_N_m(m′) · STANDARD_GRAVITY_m_s
 
 ## 5. Étape 5 en cours : contraintes et critères
 
-### Plan
+### Plan (5a et 5b faits)
 
 1. **5a. Moteur `core/stress/`** (TypeScript pur, testé avant l'UI) :
    - contrainte normale de flexion (Navier) σ(z) = −M·z/Iy, z mesuré depuis G vers le haut, **σ > 0 en traction** ; fibres extrêmes z_sup = h − zG et z_inf = −zG (sections non symétriques : T, L) ;
@@ -233,7 +266,7 @@ BEAM_SOURCES · BEAM_ASSUMPTIONS · selfWeight_N_m(m′) · STANDARD_GRAVITY_m_s
    - contraintes équivalentes de von Mises √(σ² + 3τ²) et de Tresca √(σ² + 4τ²), contrainte principale maximale σ₁ (critère de Rankine pour les matériaux fragiles) ;
    - coefficient de sécurité n = R/σ et verdict OK / limite / KO.
 2. **5b. Page Poutres**, bloc « Vérification » sous les résultats : σ traction et σ compression maximales (fibre, abscisse), τ maximal, contrainte équivalente, résistance du matériau, coefficient de sécurité avec code couleur et icône ; flèche comparée à L/limite. Formules (bouton ƒ) avec application numérique et source.
-3. **5c. Page Contraintes autonome** (`#/contraintes`) : section + efforts combinés N, My, Vz, T ; σ, τ, von Mises, Tresca. À faire après 5a et 5b.
+3. **5c. Page Contraintes autonome (reste à faire)** (`#/contraintes`) : section + efforts combinés N, My, Vz, T ; σ, τ, von Mises, Tresca. À faire après 5a et 5b.
 
 ### Choix par défaut (provisoires, à confirmer par le responsable du projet)
 

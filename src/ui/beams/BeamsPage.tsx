@@ -1,4 +1,4 @@
-import { Fragment, useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import {
   BEAM_ASSUMPTIONS,
   beamExtrema,
@@ -26,6 +26,7 @@ import {
 import { fromSI, type UnitOf } from '@core/units';
 import { REFERENCE_MATERIALS } from '@materials/index';
 import { Button } from '@ui/components/Button';
+import { FormulaTable, type FormulaRow } from '@ui/components/FormulaTable';
 import { InfoTip } from '@ui/components/InfoTip';
 import { QuantityValue } from '@ui/components/QuantityValue';
 import { Tex } from '@ui/components/Tex';
@@ -37,6 +38,7 @@ import { useCustomMaterials } from '@ui/materials/useCustomMaterials';
 import { buildSectionInput, defaultDims, SHAPES, shapeSpec } from '@ui/sections/sectionForm';
 import { SectionDrawing } from '@ui/sections/SectionDrawing';
 import { ShapeThumbnail } from '@ui/sections/ShapeThumbnail';
+import { BeamCheck } from './BeamCheck';
 import { BeamDiagram } from './BeamDiagram';
 import { BeamDrawing, type LoadStyle } from './BeamDrawing';
 import {
@@ -58,7 +60,7 @@ import {
   type LoadDraft,
   type SupportDraft,
 } from './beamForm';
-import { absExtremum, GENERAL_FORMULAS, knownCase, type BeamFormula } from './beamFormulas';
+import { absExtremum, GENERAL_FORMULAS, knownCase } from './beamFormulas';
 
 type Dims = Record<string, number | undefined>;
 type LengthUnit = UnitOf<'length'>;
@@ -129,14 +131,7 @@ function staticityLabel(s: BeamStaticity): string {
     : `Poutre hyperstatique de degré ${s.degree} : les réactions dépendent de la déformée (EI constant).`;
 }
 
-interface ResultRow {
-  key: string;
-  label: string;
-  symbol: string;
-  value: ReactNode;
-  detail?: string;
-  formula?: BeamFormula | undefined;
-}
+type ResultRow = FormulaRow;
 
 function buildRows(c: Computed, lengthUnit: LengthUnit): ResultRow[] {
   const { model, solution, extrema, refForce_N: F } = c;
@@ -253,15 +248,6 @@ function Results({
   caseName: string | undefined;
   staticity: BeamStaticity;
 }) {
-  const [shown, setShown] = useState<ReadonlySet<string>>(new Set());
-  const toggle = (k: string) =>
-    setShown((prev) => {
-      const next = new Set(prev);
-      if (next.has(k)) next.delete(k);
-      else next.add(k);
-      return next;
-    });
-
   return (
     <section
       aria-labelledby="resultats-poutre"
@@ -277,56 +263,7 @@ function Results({
           numérique en kN et m).
         </p>
       )}
-      <table className="mt-2 w-full">
-        <tbody>
-          {rows.map((r) => {
-            const f = r.formula;
-            const open = f !== undefined && shown.has(r.key);
-            return (
-              <Fragment key={r.key}>
-                <tr className={open ? '' : 'border-b border-slate-100'}>
-                  <th
-                    scope="row"
-                    className="py-1.5 pr-3 text-left text-sm font-normal text-slate-600"
-                  >
-                    {r.label}
-                    {r.detail !== undefined && r.detail !== '' && (
-                      <span className="block text-xs text-slate-500">{r.detail}</span>
-                    )}
-                  </th>
-                  <td className="py-1.5 pr-2 font-serif italic whitespace-nowrap">{r.symbol}</td>
-                  <td className="py-1.5 text-right">{r.value}</td>
-                  <td className="no-print w-8 py-1.5 pl-2 text-right">
-                    {f && (
-                      <button
-                        type="button"
-                        onClick={() => toggle(r.key)}
-                        aria-expanded={open}
-                        aria-label={`${open ? 'Masquer' : 'Afficher'} la formule de ${r.symbol}`}
-                        title={`${open ? 'Masquer' : 'Afficher'} la formule`}
-                        className={`rounded px-1.5 font-serif italic ${open ? 'bg-sky-100 text-sky-800' : 'text-slate-500 hover:bg-slate-100'}`}
-                      >
-                        ƒ
-                      </button>
-                    )}
-                  </td>
-                </tr>
-                {open && (
-                  <tr className="border-b border-slate-100">
-                    <td colSpan={4} className="pb-3">
-                      <div className="overflow-x-auto rounded-md bg-slate-50 px-3 py-2 text-sm">
-                        <Tex expr={f.latex} className="block" />
-                        <Tex expr={f.application} className="mt-1 block text-slate-700" />
-                        <p className="mt-1.5 text-xs text-slate-500">Source : {f.source}</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </Fragment>
-            );
-          })}
-        </tbody>
-      </table>
+      <FormulaTable rows={rows} />
     </section>
   );
 }
@@ -1023,6 +960,15 @@ export function BeamsPage() {
             rows={buildRows(result, lengthUnit)}
             caseName={knownCase(result.model, result.extrema)?.name}
             staticity={result.solution.staticity}
+          />
+
+          <BeamCheck
+            length_m={result.model.length_m}
+            extrema={result.extrema}
+            refForce_N={result.refForce_N}
+            section={inertiaMode === 'section' ? section : undefined}
+            material={material}
+            lengthUnit={lengthUnit}
           />
 
           <section className="space-y-3" aria-labelledby="diagrammes-poutre">
