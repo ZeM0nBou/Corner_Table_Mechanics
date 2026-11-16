@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import type { Material } from '@materials/schema';
 import { MaterialSchema } from '@materials/schema';
 import { REFERENCE_MATERIALS } from '@materials/index';
-import { resolveSharedMaterial, toSharedMaterial } from '@share/materialLink';
+import {
+  addLinkedMaterial,
+  linkedMaterialConflicts,
+  resolveSharedMaterial,
+  toSharedMaterial,
+} from '@share/materialLink';
 import type { SharedReferenceMaterial } from '@share/schemas';
 
 /** Matériaux fictifs (valeurs de test, sans signification physique particulière). */
@@ -177,5 +182,39 @@ describe('base de référence réelle', () => {
       expect(r?.status, m.id).toEqual({ kind: 'reference' });
       expect(r?.material).toBe(m);
     }
+  });
+});
+
+describe('addLinkedMaterial', () => {
+  const other: Material = { ...perso, id: 'perso-autre', name: 'Autre' };
+
+  it('sans conflit : ajouté en fin de liste, même identifiant', () => {
+    expect(linkedMaterialConflicts([other], perso)).toBe(false);
+    const r = addLinkedMaterial([other], perso, 'keep-both');
+    expect(r.materials).toEqual([other, perso]);
+    expect(r.id).toBe('perso-alu-maison');
+  });
+
+  it('identifiant sans préfixe (lien forgé ou matériau temporaire) → préfixe « perso- »', () => {
+    const r = addLinkedMaterial([], { ...perso, id: 'lien-acier-test' }, 'keep-both');
+    expect(r.id).toBe('perso-lien-acier-test');
+    expect(r.materials[0]?.id).toBe('perso-lien-acier-test');
+  });
+
+  it('conflit, « remplacer » : remplacé sur place', () => {
+    const local = { ...perso, E_Pa: 69e9 };
+    expect(linkedMaterialConflicts([local, other], perso)).toBe(true);
+    const r = addLinkedMaterial([local, other], perso, 'replace');
+    expect(r.materials).toEqual([perso, other]);
+    expect(r.id).toBe('perso-alu-maison');
+  });
+
+  it('conflit, « garder les deux » : ajouté sous un nouvel identifiant', () => {
+    const local = { ...perso, E_Pa: 69e9 };
+    const r = addLinkedMaterial([local], perso, 'keep-both');
+    expect(r.materials).toHaveLength(2);
+    expect(r.materials[0]).toBe(local);
+    expect(r.id).toBe('perso-alu-maison-2');
+    expect(r.materials[1]).toEqual({ ...perso, id: 'perso-alu-maison-2' });
   });
 });

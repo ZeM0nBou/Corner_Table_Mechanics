@@ -33,11 +33,15 @@ import { UnitInput } from '@ui/components/UnitInput';
 import { UnitSelect } from '@ui/components/UnitSelect';
 import { formatNumber } from '@ui/format';
 import { MaterialDropdown } from '@ui/materials/MaterialDropdown';
-import { useCustomMaterials } from '@ui/materials/useCustomMaterials';
+import { LinkNotice } from '@ui/share/LinkNotice';
+import { ShareBar } from '@ui/share/ShareBar';
+import type { LinkLoad } from '@ui/share/SharedPageLoader';
+import { usePageMaterial } from '@ui/share/usePageMaterial';
 import { buildSectionInput, defaultDims, shapeSpec } from '@ui/sections/sectionForm';
 import { SectionShapeFields, type Dims } from '@ui/sections/SectionShapeFields';
 import { SectionDrawing } from '@ui/sections/SectionDrawing';
 import { BeamCheck } from './BeamCheck';
+import { DEFAULT_DEFLECTION_LIMIT, DEFAULT_THRESHOLD } from './beamCheckModel';
 import { BeamDiagram } from './BeamDiagram';
 import { BeamDrawing, type LoadStyle } from './BeamDrawing';
 import {
@@ -60,6 +64,7 @@ import {
   type SupportDraft,
 } from './beamForm';
 import { absExtremum, GENERAL_FORMULAS, knownCase } from './beamFormulas';
+import { fromSharedBeam, toSharedBeam, type BeamPageState } from './beamShare';
 
 type LengthUnit = UnitOf<'length'>;
 
@@ -532,23 +537,48 @@ function SelfWeightEditor({
 
 const DEFAULT_MATERIAL = REFERENCE_MATERIALS.find((m) => m.id === 's235jr')?.id ?? '';
 
-export function BeamsPage() {
-  const [form, setForm] = useState<BeamForm>(defaultForm);
-  // Identifiants 1 à 3 pris par le formulaire par défaut.
-  const [nextId, setNextId] = useState(4);
-  const [lengthUnit, setLengthUnit] = useState<LengthUnit>('m');
+/** État de la page à l'ouverture sans lien (identifiants 1 à 3 pris par le formulaire). */
+function defaultPageState(): BeamPageState {
+  return {
+    form: defaultForm(),
+    nextId: 4,
+    lengthUnit: 'm',
+    manualE: undefined,
+    inertiaMode: 'section',
+    shape: 'I',
+    dimsByShape: {},
+    manualI: undefined,
+    manualMass: undefined,
+    threshold: DEFAULT_THRESHOLD,
+    deflectionLimit: DEFAULT_DEFLECTION_LIMIT,
+  };
+}
+
+export function BeamsPage({ link }: { link: LinkLoad<'poutres'> }) {
+  const [init] = useState(() =>
+    link.kind === 'ok' ? fromSharedBeam(link.state) : defaultPageState(),
+  );
+  const [form, setForm] = useState<BeamForm>(init.form);
+  const [nextId, setNextId] = useState(init.nextId);
+  const [lengthUnit, setLengthUnit] = useState<LengthUnit>(init.lengthUnit);
 
   // Section et matériau : rigidité EI (flèche) et masse linéique (poids propre).
-  const custom = useCustomMaterials();
-  const [materialId, setMaterialId] = useState(DEFAULT_MATERIAL);
-  const [manualE, setManualE] = useState<number | undefined>(undefined);
-  const [inertiaMode, setInertiaMode] = useState<'section' | 'directe'>('section');
-  const [shape, setShape] = useState<SectionShape>('I');
-  const [dimsByShape, setDimsByShape] = useState<Partial<Record<SectionShape, Dims>>>({});
-  const [manualI, setManualI] = useState<number | undefined>(undefined);
-  const [manualMass, setManualMass] = useState<number | undefined>(undefined);
-
-  const material = [...REFERENCE_MATERIALS, ...custom.materials].find((m) => m.id === materialId);
+  const mat = usePageMaterial(
+    DEFAULT_MATERIAL,
+    link.kind === 'ok' ? link.state.material : undefined,
+  );
+  const { material, materialId, setMaterialId } = mat;
+  const [manualE, setManualE] = useState<number | undefined>(init.manualE);
+  const [inertiaMode, setInertiaMode] = useState<'section' | 'directe'>(init.inertiaMode);
+  const [shape, setShape] = useState<SectionShape>(init.shape);
+  const [dimsByShape, setDimsByShape] = useState<Partial<Record<SectionShape, Dims>>>(
+    init.dimsByShape,
+  );
+  const [manualI, setManualI] = useState<number | undefined>(init.manualI);
+  const [manualMass, setManualMass] = useState<number | undefined>(init.manualMass);
+  // Réglages de la vérification (ici pour être partagés, et conservés quand elle disparaît).
+  const [threshold, setThreshold] = useState<number | undefined>(init.threshold);
+  const [deflectionLimit, setDeflectionLimit] = useState<number | undefined>(init.deflectionLimit);
   const E = material?.E_Pa ?? manualE;
 
   const dims = dimsByShape[shape] ?? defaultDims(shape);
@@ -644,14 +674,37 @@ export function BeamsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">Poutres</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Réactions d’appui, effort tranchant, moment fléchissant et flèche d’une poutre droite,
-          isostatique ou hyperstatique. Axe <i>x</i> le long de la poutre depuis l’extrémité gauche,{' '}
-          <i>z</i> vers le haut.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 basis-80">
+          <h2 className="text-xl font-semibold">Poutres</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Réactions d’appui, effort tranchant, moment fléchissant et flèche d’une poutre droite,
+            isostatique ou hyperstatique. Axe <i>x</i> le long de la poutre depuis l’extrémité
+            gauche, <i>z</i> vers le haut.
+          </p>
+        </div>
+        <ShareBar
+          page="poutres"
+          getState={() =>
+            toSharedBeam(
+              {
+                form,
+                lengthUnit,
+                manualE,
+                inertiaMode,
+                shape,
+                dims,
+                manualI,
+                manualMass,
+                threshold,
+                deflectionLimit,
+              },
+              mat.shared(),
+            )
+          }
+        />
       </div>
+      <LinkNotice link={link} linked={mat.linked} />
 
       <section
         className="rounded-lg border border-slate-200 bg-white p-3"
@@ -755,7 +808,7 @@ export function BeamsPage() {
           <div className="space-y-4">
             <MaterialDropdown
               reference={REFERENCE_MATERIALS}
-              custom={custom.materials}
+              custom={mat.customList}
               value={materialId}
               onChange={setMaterialId}
               label="Matériau (module d’Young, masse volumique)"
@@ -928,6 +981,10 @@ export function BeamsPage() {
             section={inertiaMode === 'section' ? section : undefined}
             material={material}
             lengthUnit={lengthUnit}
+            threshold={threshold}
+            onThresholdChange={setThreshold}
+            deflectionLimit={deflectionLimit}
+            onDeflectionLimitChange={setDeflectionLimit}
           />
 
           <section className="space-y-3" aria-labelledby="diagrammes-poutre">

@@ -12,6 +12,7 @@
  * Un matériau temporaire n'est jamais écrit dans la base de référence ni, sans
  * action de l'utilisateur, dans ses matériaux personnalisés.
  */
+import { mergeImported, withCustomPrefix } from '@materials/custom';
 import type { Material } from '@materials/schema';
 import type { SharedMaterial, SharedReferenceMaterial } from './schemas';
 
@@ -179,4 +180,36 @@ export function resolveSharedMaterial(
   // pris (autre matériau local de même identifiant) reçoit un suffixe.
   const temporary: Material = { ...original, id: freeId(original.id, taken) };
   return { material: temporary, temporary, status: { kind: 'perso-lien', original } };
+}
+
+/** Identifiant sous lequel un matériau reçu est enregistré (préfixe personnalisé imposé). */
+function savedId(original: Material): string {
+  return withCustomPrefix(original.id);
+}
+
+/** Un matériau personnalisé local porte déjà l'identifiant du matériau reçu. */
+export function linkedMaterialConflicts(
+  existing: readonly Material[],
+  original: Material,
+): boolean {
+  const id = savedId(original);
+  return existing.some((m) => m.id === id);
+}
+
+/**
+ * Ajoute à ses matériaux personnalisés un matériau reçu par un lien, avec la même
+ * gestion des conflits que l'import JSON (`mergeImported`).
+ * @param decision utilisée seulement en cas de conflit d'identifiant
+ * @returns la nouvelle liste et l'identifiant du matériau enregistré
+ */
+export function addLinkedMaterial(
+  existing: readonly Material[],
+  original: Material,
+  decision: 'replace' | 'keep-both',
+): { materials: Material[]; id: string } {
+  const m = { ...original, id: savedId(original) };
+  const conflict = linkedMaterialConflicts(existing, original);
+  const { materials } = mergeImported(existing, [m], conflict ? { [m.id]: decision } : {});
+  const id = conflict && decision === 'keep-both' ? (materials.at(-1)?.id ?? m.id) : m.id;
+  return { materials, id };
 }

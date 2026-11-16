@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { BeamExtrema } from '@core/beams';
 import type { SectionResult } from '@core/sections';
 import { VerdictBadge } from '@ui/components/VerdictBadge';
@@ -10,8 +9,6 @@ import { NumberInput } from '@ui/components/UnitInput';
 import { formatNumber } from '@ui/format';
 import { evaluateCheck, type CheckEvaluation } from './beamCheckModel';
 
-const DEFAULT_THRESHOLD = 1.5;
-const DEFAULT_DEFLECTION_LIMIT = 300;
 const FIBRE_LABEL = { superieure: 'fibre supérieure', inferieure: 'fibre inférieure' } as const;
 
 function buildRows(
@@ -121,6 +118,12 @@ interface BeamCheckProps {
   section: SectionResult | undefined;
   material: Material | undefined;
   lengthUnit: UnitOf<'length'>;
+  /** Seuil du coefficient de sécurité (état tenu par la page, partagé par lien). */
+  threshold: number | undefined;
+  onThresholdChange: (v: number | undefined) => void;
+  /** Flèche admissible : L / deflectionLimit. */
+  deflectionLimit: number | undefined;
+  onDeflectionLimitChange: (v: number | undefined) => void;
 }
 
 /**
@@ -135,9 +138,11 @@ export function BeamCheck({
   section,
   material,
   lengthUnit,
+  threshold,
+  onThresholdChange,
+  deflectionLimit: limit,
+  onDeflectionLimitChange,
 }: BeamCheckProps) {
-  const [threshold, setThreshold] = useState<number | undefined>(DEFAULT_THRESHOLD);
-  const [limit, setLimit] = useState<number | undefined>(DEFAULT_DEFLECTION_LIMIT);
   const at = (x_m: number) =>
     `en x = ${formatNumber(fromSI(x_m, 'length', lengthUnit))} ${lengthUnit}`;
 
@@ -170,15 +175,15 @@ export function BeamCheck({
         <NumberInput
           label="Seuil du coefficient de sécurité"
           symbol="n"
-          initial={DEFAULT_THRESHOLD}
-          onChange={setThreshold}
+          initial={threshold}
+          onChange={onThresholdChange}
           error={thresholdOk ? undefined : 'Au moins 1.'}
         />
         <NumberInput
           label="Flèche admissible : L divisée par"
           symbol="L/…"
-          initial={DEFAULT_DEFLECTION_LIMIT}
-          onChange={setLimit}
+          initial={limit}
+          onChange={onDeflectionLimitChange}
           error={limitOk ? undefined : 'Nombre positif.'}
         />
       </div>

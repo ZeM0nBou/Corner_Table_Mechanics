@@ -13,10 +13,14 @@ import { NumberInput, UnitInput } from '@ui/components/UnitInput';
 import { VerdictBadge } from '@ui/components/VerdictBadge';
 import { formatNumber } from '@ui/format';
 import { MaterialDropdown } from '@ui/materials/MaterialDropdown';
-import { useCustomMaterials } from '@ui/materials/useCustomMaterials';
+import { LinkNotice } from '@ui/share/LinkNotice';
+import { ShareBar } from '@ui/share/ShareBar';
+import type { LinkLoad } from '@ui/share/SharedPageLoader';
+import { usePageMaterial } from '@ui/share/usePageMaterial';
 import { buildSectionInput, defaultDims, shapeSpec } from '@ui/sections/sectionForm';
 import { SectionDrawing } from '@ui/sections/SectionDrawing';
 import { SectionShapeFields, type Dims } from '@ui/sections/SectionShapeFields';
+import { fromSharedSection, toSharedSection } from '@ui/sections/sectionShare';
 import { BucklingDrawing } from './BucklingDrawing';
 import { bucklingAxes, evaluateBuckling, type BucklingEvaluation } from './bucklingModel';
 
@@ -171,21 +175,29 @@ function PlaneFields({
   );
 }
 
-export function BucklingPage() {
-  const custom = useCustomMaterials();
-  const [materialId, setMaterialId] = useState(DEFAULT_MATERIAL);
-  const [manualE, setManualE] = useState<number | undefined>(undefined);
-  const [shape, setShape] = useState<SectionShape>('I');
-  const [dimsByShape, setDimsByShape] = useState<Partial<Record<SectionShape, Dims>>>({});
-  const [length, setLength] = useState<number | undefined>(DEFAULT_LENGTH_m);
-  const [planes, setPlanes] = useState<[PlaneState, PlaneState]>([
-    { choice: 'biArticulee', freeK: 1 },
-    { choice: 'biArticulee', freeK: 1 },
-  ]);
-  const [N, setN] = useState<number | undefined>(DEFAULT_N_N);
-  const [threshold, setThreshold] = useState<number | undefined>(DEFAULT_THRESHOLD);
-
-  const material = [...REFERENCE_MATERIALS, ...custom.materials].find((m) => m.id === materialId);
+export function BucklingPage({ link }: { link: LinkLoad<'flambement'> }) {
+  const initial = link.kind === 'ok' ? link.state : undefined;
+  const initialSection = initial ? fromSharedSection(initial.section) : undefined;
+  const mat = usePageMaterial(DEFAULT_MATERIAL, initial?.material);
+  const { material, materialId, setMaterialId } = mat;
+  const [manualE, setManualE] = useState<number | undefined>(initial?.manualE_Pa);
+  const [shape, setShape] = useState<SectionShape>(initialSection?.shape ?? 'I');
+  const [dimsByShape, setDimsByShape] = useState<Partial<Record<SectionShape, Dims>>>(
+    initialSection?.dimsByShape ?? {},
+  );
+  const [length, setLength] = useState<number | undefined>(
+    initial ? initial.length_m : DEFAULT_LENGTH_m,
+  );
+  const [planes, setPlanes] = useState<[PlaneState, PlaneState]>(
+    initial?.planes ?? [
+      { choice: 'biArticulee', freeK: 1 },
+      { choice: 'biArticulee', freeK: 1 },
+    ],
+  );
+  const [N, setN] = useState<number | undefined>(initial ? initial.N_N : DEFAULT_N_N);
+  const [threshold, setThreshold] = useState<number | undefined>(
+    initial ? initial.threshold : DEFAULT_THRESHOLD,
+  );
   const E = material?.E_Pa ?? manualE;
 
   const dims = dimsByShape[shape] ?? defaultDims(shape);
@@ -231,13 +243,28 @@ export function BucklingPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">Flambement</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Charge critique d’une barre droite comprimée : Euler pour les barres élancées, Johnson
-          pour les barres peu élancées, dans deux plans avec leurs propres conditions d’appui.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 basis-80">
+          <h2 className="text-xl font-semibold">Flambement</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Charge critique d’une barre droite comprimée : Euler pour les barres élancées, Johnson
+            pour les barres peu élancées, dans deux plans avec leurs propres conditions d’appui.
+          </p>
+        </div>
+        <ShareBar
+          page="flambement"
+          getState={() => ({
+            material: mat.shared(),
+            manualE_Pa: manualE,
+            section: toSharedSection(shape, dims),
+            length_m: length,
+            planes,
+            N_N: N,
+            threshold,
+          })}
+        />
       </div>
+      <LinkNotice link={link} linked={mat.linked} />
 
       <section
         className="space-y-2 rounded-lg border border-slate-200 bg-white p-3"
@@ -276,7 +303,7 @@ export function BucklingPage() {
           <div className="space-y-4">
             <MaterialDropdown
               reference={REFERENCE_MATERIALS}
-              custom={custom.materials}
+              custom={mat.customList}
               value={materialId}
               onChange={setMaterialId}
               label="Matériau (E, Re)"
@@ -343,7 +370,7 @@ export function BucklingPage() {
             symbol="L"
             quantity="length"
             defaultUnit="m"
-            initialSI={DEFAULT_LENGTH_m}
+            initialSI={length}
             onChange={setLength}
           />
           <UnitInput
@@ -351,7 +378,7 @@ export function BucklingPage() {
             symbol="N"
             quantity="force"
             defaultUnit="kN"
-            initialSI={DEFAULT_N_N}
+            initialSI={N}
             onChange={setN}
           />
           <PlaneFields axis={axisNames[0] ?? 'y'} state={planes[0]} onChange={setPlane(0)} />
@@ -359,7 +386,7 @@ export function BucklingPage() {
           <NumberInput
             label="Seuil du coefficient de sécurité"
             symbol="n"
-            initial={DEFAULT_THRESHOLD}
+            initial={threshold}
             onChange={setThreshold}
             error={thresholdOk ? undefined : 'Au moins 1.'}
           />

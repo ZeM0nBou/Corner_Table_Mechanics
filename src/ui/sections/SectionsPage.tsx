@@ -12,12 +12,14 @@ import { Tex } from '@ui/components/Tex';
 import { UnitInput } from '@ui/components/UnitInput';
 import { formatNumber } from '@ui/format';
 import { MaterialDropdown } from '@ui/materials/MaterialDropdown';
-import { useCustomMaterials } from '@ui/materials/useCustomMaterials';
+import { LinkNotice } from '@ui/share/LinkNotice';
+import { ShareBar } from '@ui/share/ShareBar';
+import type { LinkLoad } from '@ui/share/SharedPageLoader';
+import { usePageMaterial } from '@ui/share/usePageMaterial';
 import { SectionDrawing } from './SectionDrawing';
 import { buildSectionInput, defaultDims, SHAPES, shapeSpec } from './sectionForm';
 import { resultFormulas, type ResultFormula, type ResultKey } from './sectionFormulas';
-
-type Dims = Record<string, number | undefined>;
+import { fromSharedSection, toSharedSection, type Dims } from './sectionShare';
 
 function compute(shape: SectionShape, dims: Dims): { result?: SectionResult; error?: string } {
   const input = buildSectionInput(shape, dims);
@@ -264,16 +266,20 @@ function Results({
   );
 }
 
-export function SectionsPage() {
-  const [shape, setShape] = useState<SectionShape>('I');
-  const [dimsByShape, setDimsByShape] = useState<Partial<Record<SectionShape, Dims>>>({});
-  const custom = useCustomMaterials();
-  const [materialId, setMaterialId] = useState('');
+export function SectionsPage({ link }: { link: LinkLoad<'sections'> }) {
+  const initial = link.kind === 'ok' ? link.state : undefined;
+  const fromLink = initial ? fromSharedSection(initial.section) : undefined;
+  const [shape, setShape] = useState<SectionShape>(fromLink?.shape ?? 'I');
+  const [dimsByShape, setDimsByShape] = useState<Partial<Record<SectionShape, Dims>>>(
+    fromLink?.dimsByShape ?? {},
+  );
+  const mat = usePageMaterial('', initial?.material);
+  const { material, materialId, setMaterialId } = mat;
 
   const spec = shapeSpec(shape);
   const dims = dimsByShape[shape] ?? defaultDims(shape);
   const { result, error } = compute(shape, dims);
-  const material = [...REFERENCE_MATERIALS, ...custom.materials].find((m) => m.id === materialId);
+  const shareState = () => ({ section: toSharedSection(shape, dims), material: mat.shared() });
   const numericDims = Object.fromEntries(spec.dims.map((d) => [d.key, dims[d.key] ?? NaN]));
 
   const setDim = (key: string) => (v: number | undefined) =>
@@ -284,14 +290,18 @@ export function SectionsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">Propriétés de sections</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Repère de l’EN 1993 : <i>y</i> horizontal vers la droite, <i>z</i> vertical vers le haut,{' '}
-          <i>x</i> le long de la poutre. Origine O au coin inférieur gauche de la section ; Iy
-          correspond à la flexion autour de l’axe horizontal (axe fort d’un profilé en I).
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 basis-80">
+          <h2 className="text-xl font-semibold">Propriétés de sections</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Repère de l’EN 1993 : <i>y</i> horizontal vers la droite, <i>z</i> vertical vers le
+            haut, <i>x</i> le long de la poutre. Origine O au coin inférieur gauche de la section ;
+            Iy correspond à la flexion autour de l’axe horizontal (axe fort d’un profilé en I).
+          </p>
+        </div>
+        <ShareBar page="sections" getState={shareState} />
       </div>
+      <LinkNotice link={link} linked={mat.linked} />
 
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Forme de la section">
         {SHAPES.map((s) => (
@@ -345,7 +355,7 @@ export function SectionsPage() {
           )}
           <MaterialDropdown
             reference={REFERENCE_MATERIALS}
-            custom={custom.materials}
+            custom={mat.customList}
             value={materialId}
             onChange={setMaterialId}
             label="Matériau (uniquement pour la masse linéique)"

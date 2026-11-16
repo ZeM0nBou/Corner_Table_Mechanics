@@ -15,10 +15,14 @@ import { NumberInput, UnitInput } from '@ui/components/UnitInput';
 import { VerdictBadge } from '@ui/components/VerdictBadge';
 import { formatNumber } from '@ui/format';
 import { MaterialDropdown } from '@ui/materials/MaterialDropdown';
-import { useCustomMaterials } from '@ui/materials/useCustomMaterials';
+import { LinkNotice } from '@ui/share/LinkNotice';
+import { ShareBar } from '@ui/share/ShareBar';
+import type { LinkLoad } from '@ui/share/SharedPageLoader';
+import { usePageMaterial } from '@ui/share/usePageMaterial';
 import { buildSectionInput, defaultDims, shapeSpec } from '@ui/sections/sectionForm';
 import { SectionDrawing } from '@ui/sections/SectionDrawing';
 import { SectionShapeFields, type Dims } from '@ui/sections/SectionShapeFields';
+import { fromSharedSection, toSharedSection } from '@ui/sections/sectionShare';
 import { evaluateStress, type StressEvaluation } from './stressModel';
 
 const DEFAULT_MATERIAL = REFERENCE_MATERIALS.find((m) => m.id === 's235jr')?.id ?? '';
@@ -176,15 +180,19 @@ function Convention() {
   );
 }
 
-export function StressPage() {
-  const custom = useCustomMaterials();
-  const [materialId, setMaterialId] = useState(DEFAULT_MATERIAL);
-  const [shape, setShape] = useState<SectionShape>('I');
-  const [dimsByShape, setDimsByShape] = useState<Partial<Record<SectionShape, Dims>>>({});
-  const [efforts, setEfforts] = useState<Efforts>(DEFAULT_EFFORTS);
-  const [threshold, setThreshold] = useState<number | undefined>(DEFAULT_THRESHOLD);
-
-  const material = [...REFERENCE_MATERIALS, ...custom.materials].find((m) => m.id === materialId);
+export function StressPage({ link }: { link: LinkLoad<'contraintes'> }) {
+  const initial = link.kind === 'ok' ? link.state : undefined;
+  const initialSection = initial ? fromSharedSection(initial.section) : undefined;
+  const mat = usePageMaterial(DEFAULT_MATERIAL, initial?.material);
+  const { material, materialId, setMaterialId } = mat;
+  const [shape, setShape] = useState<SectionShape>(initialSection?.shape ?? 'I');
+  const [dimsByShape, setDimsByShape] = useState<Partial<Record<SectionShape, Dims>>>(
+    initialSection?.dimsByShape ?? {},
+  );
+  const [efforts, setEfforts] = useState<Efforts>(initial?.efforts ?? DEFAULT_EFFORTS);
+  const [threshold, setThreshold] = useState<number | undefined>(
+    initial ? initial.threshold : DEFAULT_THRESHOLD,
+  );
 
   const dims = dimsByShape[shape] ?? defaultDims(shape);
   const numericDims = Object.fromEntries(
@@ -226,13 +234,25 @@ export function StressPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">Contraintes</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Contraintes dans une section sous effort normal, flexion, effort tranchant et torsion ;
-          contraintes équivalentes de von Mises et de Tresca et coefficient de sécurité.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 basis-80">
+          <h2 className="text-xl font-semibold">Contraintes</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Contraintes dans une section sous effort normal, flexion, effort tranchant et torsion ;
+            contraintes équivalentes de von Mises et de Tresca et coefficient de sécurité.
+          </p>
+        </div>
+        <ShareBar
+          page="contraintes"
+          getState={() => ({
+            material: mat.shared(),
+            section: toSharedSection(shape, dims),
+            efforts,
+            threshold,
+          })}
+        />
       </div>
+      <LinkNotice link={link} linked={mat.linked} />
 
       <section
         className="grid gap-4 rounded-lg border border-slate-200 bg-white p-3 md:grid-cols-[minmax(0,16rem)_1fr]"
@@ -273,7 +293,7 @@ export function StressPage() {
           <div className="space-y-4">
             <MaterialDropdown
               reference={REFERENCE_MATERIALS}
-              custom={custom.materials}
+              custom={mat.customList}
               value={materialId}
               onChange={setMaterialId}
               label="Matériau (résistance)"
@@ -320,7 +340,7 @@ export function StressPage() {
             <NumberInput
               label="Seuil du coefficient de sécurité"
               symbol="n"
-              initial={DEFAULT_THRESHOLD}
+              initial={threshold}
               onChange={setThreshold}
               error={thresholdOk ? undefined : 'Au moins 1.'}
             />
@@ -336,7 +356,7 @@ export function StressPage() {
             symbol="N"
             quantity="force"
             defaultUnit="kN"
-            initialSI={DEFAULT_EFFORTS.N_N}
+            initialSI={efforts.N_N}
             onChange={setEffort('N_N')}
           />
           <UnitInput
@@ -344,7 +364,7 @@ export function StressPage() {
             symbol="My"
             quantity="moment"
             defaultUnit="kN·m"
-            initialSI={DEFAULT_EFFORTS.My_Nm}
+            initialSI={efforts.My_Nm}
             onChange={setEffort('My_Nm')}
           />
           <UnitInput
@@ -352,7 +372,7 @@ export function StressPage() {
             symbol="Vz"
             quantity="force"
             defaultUnit="kN"
-            initialSI={DEFAULT_EFFORTS.Vz_N}
+            initialSI={efforts.Vz_N}
             onChange={setEffort('Vz_N')}
           />
           <UnitInput
@@ -360,7 +380,7 @@ export function StressPage() {
             symbol="T"
             quantity="moment"
             defaultUnit="N·m"
-            initialSI={DEFAULT_EFFORTS.T_Nm}
+            initialSI={efforts.T_Nm}
             onChange={setEffort('T_Nm')}
           />
         </div>

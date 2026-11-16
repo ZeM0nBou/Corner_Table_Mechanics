@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { shareParamFromHash } from '@share/share';
 
 /**
  * Navigation minimale par ancre (#/materiaux…), sans bibliothèque de routage.
@@ -16,4 +17,11 @@ function getRoute(): string {
 /** Route courante, sans le « #/ » initial (chaîne vide pour l'accueil). */
 export function useHashRoute(): string {
   return useSyncExternalStore(subscribe, getRoute, () => '');
+}
+
+const getShareParam = () => shareParamFromHash(window.location.hash);
+
+/** Paramètre de partage `c` de l'ancre (`#/poutres?c=…`), ou `undefined`. */
+export function useShareParam(): string | undefined {
+  return useSyncExternalStore(subscribe, getShareParam, () => undefined);
 }

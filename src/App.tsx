@@ -1,7 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { Disclaimer } from '@ui/components/Disclaimer';
 import { HomePage } from '@ui/HomePage';
-import { useHashRoute } from '@ui/useHashRoute';
+import { SharedPageLoader } from '@ui/share/SharedPageLoader';
+import { useHashRoute, useShareParam } from '@ui/useHashRoute';
 
 // Pages chargées à la demande : le paquet initial reste léger (l'accueil s'affiche vite).
 const MaterialsPage = lazy(() =>
@@ -27,18 +28,38 @@ const NAV = [
   { route: 'flambement', label: 'Flambement' },
 ] as const;
 
-function Page({ route }: { route: string }) {
+/**
+ * Page de la route. Les pages de calcul lisent d'abord le lien partagé éventuel
+ * (`#/poutres?c=…`) ; la clé remonte la page quand le lien change.
+ */
+function Page({ route, param }: { route: string; param: string | undefined }) {
   switch (route) {
     case 'materiaux':
       return <MaterialsPage />;
     case 'sections':
-      return <SectionsPage />;
+      return (
+        <SharedPageLoader key={param} page="sections" param={param}>
+          {(link) => <SectionsPage link={link} />}
+        </SharedPageLoader>
+      );
     case 'poutres':
-      return <BeamsPage />;
+      return (
+        <SharedPageLoader key={param} page="poutres" param={param}>
+          {(link) => <BeamsPage link={link} />}
+        </SharedPageLoader>
+      );
     case 'contraintes':
-      return <StressPage />;
+      return (
+        <SharedPageLoader key={param} page="contraintes" param={param}>
+          {(link) => <StressPage link={link} />}
+        </SharedPageLoader>
+      );
     case 'flambement':
-      return <BucklingPage />;
+      return (
+        <SharedPageLoader key={param} page="flambement" param={param}>
+          {(link) => <BucklingPage link={link} />}
+        </SharedPageLoader>
+      );
     default:
       return <HomePage />;
   }
@@ -46,6 +67,7 @@ function Page({ route }: { route: string }) {
 
 export default function App() {
   const route = useHashRoute();
+  const param = useShareParam();
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
@@ -81,7 +103,7 @@ export default function App() {
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
         <Suspense fallback={<p className="text-sm text-slate-500">Chargement…</p>}>
-          <Page route={route} />
+          <Page route={route} param={param} />
         </Suspense>
       </main>
 

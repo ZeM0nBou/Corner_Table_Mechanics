@@ -19,6 +19,11 @@ import type { Material } from '@materials/schema';
 import { checkFormulas, type CheckFormula, type CheckKey } from './beamCheckFormulas';
 import { absExtremum } from './beamFormulas';
 
+/** Seuil par défaut du coefficient de sécurité (« OK » à partir de 1,5). */
+export const DEFAULT_THRESHOLD = 1.5;
+/** Flèche admissible par défaut : L/300. */
+export const DEFAULT_DEFLECTION_LIMIT = 300;
+
 export interface CheckInput {
   length_m: number;
   extrema: BeamExtrema;
