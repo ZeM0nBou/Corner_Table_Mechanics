@@ -1,6 +1,6 @@
 # Avancement du projet — Calculs RDM « coin de table »
 
-_État au 13 novembre 2026. Ce document complète [CLAUDE.md](../CLAUDE.md), qui reste la référence pour les règles du projet._
+_État au 16 novembre 2026. Ce document complète [CLAUDE.md](../CLAUDE.md), qui reste la référence pour les règles du projet._
 
 Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 
@@ -8,16 +8,17 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 
 ## 1. Ce qui est fait
 
-| Étape de la feuille de route                        | État       | Contenu                                                                                                                                                     |
-| --------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Socle                                            | ✅         | Vite + React + TypeScript strict, Tailwind, Vitest, ESLint + Prettier, déploiement GitHub Pages par GitHub Actions, page d'accueil, avertissement permanent |
-| 2. Unités + base matériaux                          | ✅         | `core/units.ts`, schéma Zod, 13 matériaux de référence, page Matériaux avec recherche et familles repliables                                                |
-| 2bis. Matériaux personnalisés                       | ✅         | Création, modification, duplication, stockage dans le navigateur, export et import JSON avec résolution des conflits                                        |
-| 2ter. Aide au choix des matériaux                   | ✅         | Indice de prix (€ à €€€€€), aptitude à 17 procédés, secteurs, emplois, atouts et limites                                                                    |
-| 3. Sections                                         | ✅         | 8 formes paramétriques, schéma coté, résultats avec formules LaTeX et application numérique                                                                 |
-| 3bis. Catalogue de profilés (IPE, HEA, HEB, UPN, L) | ⏳ à faire | —                                                                                                                                                           |
-| 4. Poutres (isostatiques et hyperstatiques)         | ✅         | Appuis et encastrements en nombre libre ; forces, couples, charges réparties linéaires, poids propre ; réactions, V, M, rotation, flèche ; diagrammes SVG   |
-| 5 à 8                                               | ⏳ à faire | Contraintes, flambement, partage par URL et export PDF, modules complémentaires                                                                             |
+| Étape de la feuille de route                        | État        | Contenu                                                                                                                                                     |
+| --------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Socle                                            | ✅          | Vite + React + TypeScript strict, Tailwind, Vitest, ESLint + Prettier, déploiement GitHub Pages par GitHub Actions, page d'accueil, avertissement permanent |
+| 2. Unités + base matériaux                          | ✅          | `core/units.ts`, schéma Zod, 13 matériaux de référence, page Matériaux avec recherche et familles repliables                                                |
+| 2bis. Matériaux personnalisés                       | ✅          | Création, modification, duplication, stockage dans le navigateur, export et import JSON avec résolution des conflits                                        |
+| 2ter. Aide au choix des matériaux                   | ✅          | Indice de prix (€ à €€€€€), aptitude à 17 procédés, secteurs, emplois, atouts et limites                                                                    |
+| 3. Sections                                         | ✅          | 8 formes paramétriques, schéma coté, résultats avec formules LaTeX et application numérique                                                                 |
+| 3bis. Catalogue de profilés (IPE, HEA, HEB, UPN, L) | ⏳ à faire  | —                                                                                                                                                           |
+| 4. Poutres (isostatiques et hyperstatiques)         | ✅          | Appuis et encastrements en nombre libre ; forces, couples, charges réparties linéaires, poids propre ; réactions, V, M, rotation, flèche ; diagrammes SVG   |
+| 5. Contraintes et critères                          | 🚧 en cours | Voir § 5 : vérification de résistance et de flèche dans la page Poutres, puis page Contraintes autonome                                                     |
+| 6 à 8                                               | ⏳ à faire  | Flambement, partage par URL et export PDF, modules complémentaires                                                                                          |
 
 **Qualité :** 398 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
 
@@ -216,5 +217,29 @@ BEAM_SOURCES · BEAM_ASSUMPTIONS · selfWeight_N_m(m′) · STANDARD_GRAVITY_m_s
 
 - [ ] **Étape 3bis :** catalogue IPE, HEA, HEB, UPN et cornières, valeurs sourcées (ArcelorMittal, EN 10365) en `verified: false`.
 - [ ] **Poutres, suites possibles :** cas de charge pondérés (`combineSolutions`, ex. 1,35 G + 1,5 Q), expression de M(x) par tronçon, schéma affiché même en cas d'erreur.
-- [ ] **Étapes 5 à 8 :** contraintes et critères, flambement d'Euler, partage par URL et export PDF, modules complémentaires.
+- [ ] **Étape 5 :** voir § 5.
+- [ ] **Étapes 6 à 8 :** flambement d'Euler, partage par URL et export PDF, modules complémentaires.
 - [ ] Éventuellement : tests de composants React (nécessite jsdom et Testing Library, à valider), centre de cisaillement, profilé I à semelles différentes.
+
+---
+
+## 5. Étape 5 en cours : contraintes et critères
+
+### Plan
+
+1. **5a. Moteur `core/stress/`** (TypeScript pur, testé avant l'UI) :
+   - contrainte normale de flexion (Navier) σ(z) = −M·z/Iy, z mesuré depuis G vers le haut, **σ > 0 en traction** ; fibres extrêmes z_sup = h − zG et z_inf = −zG (sections non symétriques : T, L) ;
+   - contrainte de cisaillement moyenne τ = V/Av,z ;
+   - contraintes équivalentes de von Mises √(σ² + 3τ²) et de Tresca √(σ² + 4τ²), contrainte principale maximale σ₁ (critère de Rankine pour les matériaux fragiles) ;
+   - coefficient de sécurité n = R/σ et verdict OK / limite / KO.
+2. **5b. Page Poutres**, bloc « Vérification » sous les résultats : σ traction et σ compression maximales (fibre, abscisse), τ maximal, contrainte équivalente, résistance du matériau, coefficient de sécurité avec code couleur et icône ; flèche comparée à L/limite. Formules (bouton ƒ) avec application numérique et source.
+3. **5c. Page Contraintes autonome** (`#/contraintes`) : section + efforts combinés N, My, Vz, T ; σ, τ, von Mises, Tresca. À faire après 5a et 5b.
+
+### Choix par défaut (provisoires, à confirmer par le responsable du projet)
+
+- **Matériau ductile** (Re renseignée : aciers, aluminiums, inox, titane, fonte GS) : contrainte équivalente de von Mises comparée à Re, signe indifférent. Coefficient de sécurité **brut** n = Re/σ_eq, sans coefficient partiel γ_M0.
+- **Matériau fragile** (Re absente, Rm seule : fonte grise EN-GJL) : contrainte principale de **traction** σ₁ comparée à Rm. La **compression n'est pas vérifiée**, faute de résistance en compression dans la base. Aucun champ `Rc_Pa` n'a été ajouté au schéma.
+- **Seuils réglables** : coefficient de sécurité « OK » à partir de **1,5** (« limite » entre 1 et 1,5, « KO » sous 1) ; flèche admissible **L/300** (pour une console, l'usage est plutôt L/150 : à régler à la main).
+- **Majorant** : σ_max et τ_max sont combinés même s'ils ne sont pas atteints à la même abscisse ni sur la même fibre. C'est conservatif.
+- **Section** : la vérification de contrainte demande une section paramétrique (zG, h, Av). En saisie directe de I, elle n'est pas proposée.
+- **Hors périmètre, signalé dans l'UI** : déversement, voilement local, fatigue, concentrations de contraintes, cisaillement de Jourawski (répartition réelle de τ).
