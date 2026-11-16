@@ -8,19 +8,19 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 
 ## 1. Ce qui est fait
 
-| Étape de la feuille de route                        | État        | Contenu                                                                                                                                                     |
-| --------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Socle                                            | ✅          | Vite + React + TypeScript strict, Tailwind, Vitest, ESLint + Prettier, déploiement GitHub Pages par GitHub Actions, page d'accueil, avertissement permanent |
-| 2. Unités + base matériaux                          | ✅          | `core/units.ts`, schéma Zod, 13 matériaux de référence, page Matériaux avec recherche et familles repliables                                                |
-| 2bis. Matériaux personnalisés                       | ✅          | Création, modification, duplication, stockage dans le navigateur, export et import JSON avec résolution des conflits                                        |
-| 2ter. Aide au choix des matériaux                   | ✅          | Indice de prix (€ à €€€€€), aptitude à 17 procédés, secteurs, emplois, atouts et limites                                                                    |
-| 3. Sections                                         | ✅          | 8 formes paramétriques, schéma coté, résultats avec formules LaTeX et application numérique                                                                 |
-| 3bis. Catalogue de profilés (IPE, HEA, HEB, UPN, L) | ⏳ à faire  | —                                                                                                                                                           |
-| 4. Poutres (isostatiques et hyperstatiques)         | ✅          | Appuis et encastrements en nombre libre ; forces, couples, charges réparties linéaires, poids propre ; réactions, V, M, rotation, flèche ; diagrammes SVG   |
-| 5. Contraintes et critères                          | 🚧 en cours | 5a moteur et 5b vérification dans la page Poutres faits ; 5c page Contraintes autonome à faire (voir § 5)                                                   |
-| 6 à 8                                               | ⏳ à faire  | Flambement, partage par URL et export PDF, modules complémentaires                                                                                          |
+| Étape de la feuille de route                        | État       | Contenu                                                                                                                                                     |
+| --------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Socle                                            | ✅         | Vite + React + TypeScript strict, Tailwind, Vitest, ESLint + Prettier, déploiement GitHub Pages par GitHub Actions, page d'accueil, avertissement permanent |
+| 2. Unités + base matériaux                          | ✅         | `core/units.ts`, schéma Zod, 13 matériaux de référence, page Matériaux avec recherche et familles repliables                                                |
+| 2bis. Matériaux personnalisés                       | ✅         | Création, modification, duplication, stockage dans le navigateur, export et import JSON avec résolution des conflits                                        |
+| 2ter. Aide au choix des matériaux                   | ✅         | Indice de prix (€ à €€€€€), aptitude à 17 procédés, secteurs, emplois, atouts et limites                                                                    |
+| 3. Sections                                         | ✅         | 8 formes paramétriques, schéma coté, résultats avec formules LaTeX et application numérique                                                                 |
+| 3bis. Catalogue de profilés (IPE, HEA, HEB, UPN, L) | ⏳ à faire | —                                                                                                                                                           |
+| 4. Poutres (isostatiques et hyperstatiques)         | ✅         | Appuis et encastrements en nombre libre ; forces, couples, charges réparties linéaires, poids propre ; réactions, V, M, rotation, flèche ; diagrammes SVG   |
+| 5. Contraintes et critères                          | ✅         | Moteur (Navier, flexion composée et déviée, τ moyen, torsion par forme, von Mises, Tresca, σ₁) ; vérification dans la page Poutres ; page Contraintes       |
+| 6 à 8                                               | ⏳ à faire | Flambement, partage par URL et export PDF, modules complémentaires                                                                                          |
 
-**Qualité :** 443 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
+**Qualité :** 479 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
 
 ### Pages de l'application
 
@@ -34,6 +34,7 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
   - **Rigidité :** E du matériau ou saisi, I d'une section paramétrique (avec le schéma coté de l'onglet Sections et un bouton ⓘ qui montre les vignettes des formes au survol) ou saisi ; sans EI, seuls les réactions, V et M sont donnés.
   - **Vérification (étape 5b) :** contraintes de traction et de compression maximales (fibre et abscisse), cisaillement moyen τ = V/Av, contrainte équivalente (von Mises pour un matériau ductile, contrainte principale de traction pour un matériau fragile), résistance du matériau, coefficient de sécurité avec pastille OK / Limite / KO (icône et mot, seuil réglable, 1,5 par défaut), flèche comparée à L/limite (300 par défaut). Formule, application numérique et source sous chaque ligne (bouton ƒ). Indisponible en saisie directe de I ou sans matériau, avec un message.
   - **Résultats :** réactions et couples d'encastrement, |V|max, |M|max, flèche maximale, L/δ, rotation maximale, avec leur abscisse. Diagrammes V, M et flèche (toutes charges cumulées) : au-dessus de chacun, la valeur au point survolé et le min et le max avec leur abscisse ; extremums marqués sur la courbe. Formule fermée (bouton ƒ) quand un cas de table est reconnu ; volet « Détail du calcul ».
+- **Contraintes (`#/contraintes`) :** schéma de la section cotée et conventions, section paramétrique et matériau, efforts N, My, Vz, T avec unités, seuil du coefficient de sécurité. Résultats : σN, traction et compression maximales (avec le point), τV, τT, τ retenu, von Mises, Tresca, σ₁, résistance et coefficient de sécurité avec pastille ; bouton ƒ sous chaque ligne ; remarques selon la forme (cornière, profil ouvert, matériau fragile) ; hypothèses et limites.
 
 ---
 
@@ -47,7 +48,7 @@ src/
     units.ts      conversions d'unités
     sections/     composite.ts (moteur à rectangles), shapes.ts (formes usuelles)
     beams/        model.ts (types, validation), solver.ts (Macaulay), analysis.ts (extremums, échantillons), sources.ts, selfWeight.ts
-    stress/       stress.ts (Navier, τ, von Mises, Tresca, σ₁, n, verdict), beamCheck.ts (vérification d'une poutre)
+    stress/       stress.ts (Navier, τ, von Mises, Tresca, σ₁, n, verdict), beamCheck.ts (vérification d'une poutre), combined.ts (efforts combinés N, My, Vz, T)
   materials/      schéma Zod, données JSON, chargement, recherche, matériaux personnalisés
   ui/             composants React, un dossier par module (materials/, sections/)
   share/          vide (prévu pour l'étape 7)
@@ -58,7 +59,7 @@ tests/            miroir de core/, materials/ et des fonctions pures de ui/
 - **Isolation du moteur :** une règle ESLint `no-restricted-imports` interdit à `src/core/**` d'importer React ou l'UI.
 - **Navigation :** par ancre (`#/materiaux`), sans bibliothèque de routage. C'est compatible GitHub Pages, qui ne réécrit pas les URL.
 - **Chargement à la demande :** les pages Matériaux, Sections et Poutres sont chargées par `React.lazy` (paquet initial 226 kB au lieu de 504 kB) ; KaTeX l'est à la première formule.
-- **Composants partagés :** `FormulaTable` (tableau avec bouton ƒ : formule, application numérique, source), `InfoTip` (bouton ⓘ à panneau), `ShapeThumbnail` (vignette de forme de section).
+- **Composants partagés :** `FormulaTable` (tableau avec bouton ƒ : formule, application numérique, source), `InfoTip` (bouton ⓘ à panneau), `ShapeThumbnail` (vignette de forme de section), `SectionShapeFields` (choix de forme et cotes, pages Poutres et Contraintes), `VerdictBadge` (pastille OK / Limite / KO).
 - **Fonctions pures de l'UI :** la logique testable de l'interface est sortie des composants, ce qui permet de la tester sans navigateur. Exemples : `materialDraft.ts`, `sectionForm.ts`, `annotations.ts`, `sectionFormulas.ts`, `format.ts`.
 
 ### 2.2 Types et unités
@@ -201,6 +202,14 @@ STRESS_SOURCES · StressInputError
 - **Saisie directe de I :** pas de vérification de contrainte (G, h et Av inconnus).
 - **Flèche admissible :** une seule valeur L/limite, appliquée à la longueur totale (console comprise).
 
+### Contraintes (page Contraintes, étape 5c)
+
+- **Efforts :** N, My, Vz et T seulement (pas de Mz ni de Vy).
+- **Majorant :** |σ|max combinée avec τ = τV + τT, même si ces maxima ne coïncident pas.
+- **Torsion :** formule de Roark approchée pour le rectangle plein (quelques %) ; Bredt en paroi mince pour le rectangle creux, sans concentration aux angles ; T·tmax/J pour les profils ouverts (I, U, L, T), sans gauchissement gêné ni concentration aux angles rentrants.
+- **Cornière :** σ en flexion déviée (avec Iyz) ; τV non calculée (Av non définie). Le centre de cisaillement du U et de la cornière n'est pas calculé : la torsion induite par Vz n'est pas comptée (signalée).
+- **Sections paramétriques seulement** (pas de saisie directe de A et I).
+
 ### Application
 
 - **Interface non testée automatiquement :** les composants React n'ont pas de tests (ni jsdom ni Testing Library), seules les fonctions pures de l'UI le sont. Le rendu (schéma, panneaux) se vérifie à la main.
@@ -239,6 +248,7 @@ STRESS_SOURCES · StressInputError
 **Contraintes (`src/core/stress/`)**
 
 - [ ] Paragraphes de Timoshenko & Gere pour la formule de Navier, le critère de Tresca et les contraintes principales.
+- [ ] Torsion (`combined.ts`) : n° de tableau de Roark pour le rectangle plein (coefficients 0,6095 ; 0,8865 ; −1,8023 ; 0,9100) et les profils minces ouverts ; paragraphes de Bredt, de la torsion des arbres et de la flexion déviée.
 - [ ] Paragraphe de l'EN 1990 (annexe A1.4) pour les limites de flèche.
 
 **Poutres (`src/core/beams/`)**
@@ -250,15 +260,15 @@ STRESS_SOURCES · StressInputError
 
 - [ ] **Étape 3bis :** catalogue IPE, HEA, HEB, UPN et cornières, valeurs sourcées (ArcelorMittal, EN 10365) en `verified: false`.
 - [ ] **Poutres, suites possibles :** cas de charge pondérés (`combineSolutions`, ex. 1,35 G + 1,5 Q), expression de M(x) par tronçon, schéma affiché même en cas d'erreur.
-- [ ] **Étape 5 :** voir § 5.
+- [ ] **Poutres :** la flexion d’une cornière ignore Iyz (σ et flèche) ; la page Contraintes, elle, en tient compte. À aligner.
 - [ ] **Étapes 6 à 8 :** flambement d'Euler, partage par URL et export PDF, modules complémentaires.
 - [ ] Éventuellement : tests de composants React (nécessite jsdom et Testing Library, à valider), centre de cisaillement, profilé I à semelles différentes.
 
 ---
 
-## 5. Étape 5 en cours : contraintes et critères
+## 5. Étape 5 terminée : contraintes et critères
 
-### Plan (5a et 5b faits)
+### Plan (5a, 5b et 5c faits)
 
 1. **5a. Moteur `core/stress/`** (TypeScript pur, testé avant l'UI) :
    - contrainte normale de flexion (Navier) σ(z) = −M·z/Iy, z mesuré depuis G vers le haut, **σ > 0 en traction** ; fibres extrêmes z_sup = h − zG et z_inf = −zG (sections non symétriques : T, L) ;
@@ -266,7 +276,13 @@ STRESS_SOURCES · StressInputError
    - contraintes équivalentes de von Mises √(σ² + 3τ²) et de Tresca √(σ² + 4τ²), contrainte principale maximale σ₁ (critère de Rankine pour les matériaux fragiles) ;
    - coefficient de sécurité n = R/σ et verdict OK / limite / KO.
 2. **5b. Page Poutres**, bloc « Vérification » sous les résultats : σ traction et σ compression maximales (fibre, abscisse), τ maximal, contrainte équivalente, résistance du matériau, coefficient de sécurité avec code couleur et icône ; flèche comparée à L/limite. Formules (bouton ƒ) avec application numérique et source.
-3. **5c. Page Contraintes autonome (reste à faire)** (`#/contraintes`) : section + efforts combinés N, My, Vz, T ; σ, τ, von Mises, Tresca. À faire après 5a et 5b.
+3. **5c. Page Contraintes autonome** (`#/contraintes`) : section et efforts combinés N, My, Vz, T. Moteur `combined.ts` : σ = N/A + My·(Iyz·y − Iz·z)/(Iy·Iz − Iyz²) évaluée aux sommets de la section (se réduit à N/A − My·z/Iy si Iyz = 0) ; τV = |Vz|/Av ; τT = |T|/Wt avec Wt selon la forme ; von Mises, Tresca, σ₁. `checkStrength` est commune aux pages Poutres et Contraintes.
+
+### Décisions de l'étape 5c (confirmées par le responsable du projet le 16 novembre 2026)
+
+- **Efforts :** N, My, Vz, T (flexion plane autour de y, comme la page Poutres).
+- **Combinaison :** majorant, comme en 5b (pas d'évaluation point par point).
+- **Torsion :** calculée pour toutes les formes, avec la source et les limites de chaque formule (rectangle plein marqué `TODO: à vérifier`).
 
 ### Décisions (confirmées par le responsable du projet le 16 novembre 2026)
 

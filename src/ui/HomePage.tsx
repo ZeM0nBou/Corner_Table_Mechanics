@@ -22,7 +22,11 @@ const MODULES: readonly ModuleEntry[] = [
     description: 'Réactions, V, M, flèche — appuis et encastrements libres, poids propre',
     route: 'poutres',
   },
-  { name: 'Contraintes et critères', description: 'von Mises, Tresca, sécurité' },
+  {
+    name: 'Contraintes et critères',
+    description: 'N, M, V, torsion — von Mises, Tresca, coefficient de sécurité',
+    route: 'contraintes',
+  },
   { name: 'Flambement d’Euler', description: 'Longueurs de flambement usuelles' },
 ];
 

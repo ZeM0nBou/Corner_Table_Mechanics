@@ -11,12 +11,16 @@ const SectionsPage = lazy(() =>
   import('@ui/sections/SectionsPage').then((m) => ({ default: m.SectionsPage })),
 );
 const BeamsPage = lazy(() => import('@ui/beams/BeamsPage').then((m) => ({ default: m.BeamsPage })));
+const StressPage = lazy(() =>
+  import('@ui/stress/StressPage').then((m) => ({ default: m.StressPage })),
+);
 
 const NAV = [
   { route: '', label: 'Accueil' },
   { route: 'materiaux', label: 'Matériaux' },
   { route: 'sections', label: 'Sections' },
   { route: 'poutres', label: 'Poutres' },
+  { route: 'contraintes', label: 'Contraintes' },
 ] as const;
 
 function Page({ route }: { route: string }) {
@@ -27,6 +31,8 @@ function Page({ route }: { route: string }) {
       return <SectionsPage />;
     case 'poutres':
       return <BeamsPage />;
+    case 'contraintes':
+      return <StressPage />;
     default:
       return <HomePage />;
   }

@@ -27,7 +27,6 @@ import { fromSI, type UnitOf } from '@core/units';
 import { REFERENCE_MATERIALS } from '@materials/index';
 import { Button } from '@ui/components/Button';
 import { FormulaTable, type FormulaRow } from '@ui/components/FormulaTable';
-import { InfoTip } from '@ui/components/InfoTip';
 import { QuantityValue } from '@ui/components/QuantityValue';
 import { Tex } from '@ui/components/Tex';
 import { UnitInput } from '@ui/components/UnitInput';
@@ -35,9 +34,9 @@ import { UnitSelect } from '@ui/components/UnitSelect';
 import { formatNumber } from '@ui/format';
 import { MaterialDropdown } from '@ui/materials/MaterialDropdown';
 import { useCustomMaterials } from '@ui/materials/useCustomMaterials';
-import { buildSectionInput, defaultDims, SHAPES, shapeSpec } from '@ui/sections/sectionForm';
+import { buildSectionInput, defaultDims, shapeSpec } from '@ui/sections/sectionForm';
+import { SectionShapeFields, type Dims } from '@ui/sections/SectionShapeFields';
 import { SectionDrawing } from '@ui/sections/SectionDrawing';
-import { ShapeThumbnail } from '@ui/sections/ShapeThumbnail';
 import { BeamCheck } from './BeamCheck';
 import { BeamDiagram } from './BeamDiagram';
 import { BeamDrawing, type LoadStyle } from './BeamDrawing';
@@ -62,7 +61,6 @@ import {
 } from './beamForm';
 import { absExtremum, GENERAL_FORMULAS, knownCase } from './beamFormulas';
 
-type Dims = Record<string, number | undefined>;
 type LengthUnit = UnitOf<'length'>;
 
 interface Computed {
@@ -853,57 +851,18 @@ export function BeamsPage() {
             </div>
             {inertiaMode === 'section' ? (
               <>
-                <div className="flex flex-col gap-1 text-sm text-slate-700">
-                  <span className="flex items-center gap-1.5">
-                    <span id="forme-section-poutre">Forme de la section</span>
-                    <InfoTip label="Aperçu des formes de section">
-                      <span className="grid grid-cols-4 gap-2">
-                        {SHAPES.map((s) => (
-                          <span
-                            key={s.shape}
-                            className={`flex w-20 flex-col items-center gap-1 rounded-md p-1 text-center text-xs ${s.shape === shape ? 'bg-sky-50 text-sky-900 ring-1 ring-sky-300' : 'text-slate-600'}`}
-                          >
-                            <ShapeThumbnail shape={s.shape} />
-                            {s.label}
-                          </span>
-                        ))}
-                      </span>
-                    </InfoTip>
-                  </span>
-                  <select
-                    aria-labelledby="forme-section-poutre"
-                    value={shape}
-                    onChange={(e) => {
-                      const next = SHAPES.find((s) => s.shape === e.target.value);
-                      if (next) setShape(next.shape);
-                    }}
-                    className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5"
-                  >
-                    {SHAPES.map((s) => (
-                      <option key={s.shape} value={s.shape}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {shapeSpec(shape).dims.map((d) => (
-                    <UnitInput
-                      key={`${shape}-${d.key}`}
-                      label={d.label}
-                      symbol={d.symbol}
-                      quantity="length"
-                      defaultUnit="mm"
-                      initialSI={dims[d.key]}
-                      onChange={(v) =>
-                        setDimsByShape((prev) => ({
-                          ...prev,
-                          [shape]: { ...(prev[shape] ?? defaultDims(shape)), [d.key]: v },
-                        }))
-                      }
-                    />
-                  ))}
-                </div>
+                <SectionShapeFields
+                  idPrefix="poutre"
+                  shape={shape}
+                  dims={dims}
+                  onShapeChange={setShape}
+                  onDimChange={(key, v) =>
+                    setDimsByShape((prev) => ({
+                      ...prev,
+                      [shape]: { ...(prev[shape] ?? defaultDims(shape)), [key]: v },
+                    }))
+                  }
+                />
                 {sectionError !== undefined ? (
                   <p role="alert" className="text-sm text-red-700">
                     {sectionError}

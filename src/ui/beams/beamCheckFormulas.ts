@@ -36,6 +36,35 @@ function navier(s: FibreStress, Iy_m4: number): CheckFormula {
   };
 }
 
+/** Contrainte de comparaison : von Mises (ductile) ou contrainte principale (fragile). */
+export function equivalentFormula(check: StrengthCheck): CheckFormula {
+  const s = MPa(check.sigma_Pa);
+  const t = MPa(check.tau_Pa);
+  return check.criterion === 'vonMises'
+    ? {
+        latex: '\\sigma_{eq} = \\sqrt{\\sigma^2 + 3\\,\\tau^2}',
+        application: `= \\sqrt{(${s})^2 + 3 \\times (${t})^2} = ${MPa(check.equivalent_Pa)}`,
+        source: STRESS_SOURCES.vonMises,
+      }
+    : {
+        latex:
+          '\\sigma_1 = \\dfrac{\\sigma}{2} + \\sqrt{\\left(\\dfrac{\\sigma}{2}\\right)^2 + \\tau^2}',
+        application: `= \\dfrac{${s}}{2} + \\sqrt{\\left(\\dfrac{${s}}{2}\\right)^2 + (${t})^2} = ${MPa(check.equivalent_Pa)}`,
+        source: STRESS_SOURCES.rankine,
+      };
+}
+
+/** Coefficient de sécurité n = R / σ_comparaison. */
+export function safetyFormula(check: StrengthCheck): CheckFormula {
+  const R = check.basis.kind === 'ductile' ? 'R_e' : 'R_m';
+  const sym = check.criterion === 'vonMises' ? '\\sigma_{eq}' : '\\sigma_1';
+  return {
+    latex: `n = \\dfrac{${R}}{${sym}}`,
+    application: `= \\dfrac{${MPa(check.strength_Pa)}}{${MPa(check.equivalent_Pa)}} = ${Number.isFinite(check.safetyFactor) ? tex(check.safetyFactor) : '\\infty'}`,
+    source: STRESS_SOURCES.safety,
+  };
+}
+
 /**
  * Formules de la vérification de résistance (et de flèche si `deflection` est fourni).
  * `Av_m2` est l'aire de cisaillement utilisée (absente : pas de formule pour τ).
@@ -58,28 +87,8 @@ export function checkFormulas(
       source: STRESS_SOURCES.shear,
     };
   }
-  const s = MPa(check.sigma_Pa);
-  const t = MPa(check.tau_Pa);
-  f.equivalent =
-    check.criterion === 'vonMises'
-      ? {
-          latex: '\\sigma_{eq} = \\sqrt{\\sigma^2 + 3\\,\\tau^2}',
-          application: `= \\sqrt{(${s})^2 + 3 \\times (${t})^2} = ${MPa(check.equivalent_Pa)}`,
-          source: STRESS_SOURCES.vonMises,
-        }
-      : {
-          latex:
-            '\\sigma_1 = \\dfrac{\\sigma}{2} + \\sqrt{\\left(\\dfrac{\\sigma}{2}\\right)^2 + \\tau^2}',
-          application: `= \\dfrac{${s}}{2} + \\sqrt{\\left(\\dfrac{${s}}{2}\\right)^2 + (${t})^2} = ${MPa(check.equivalent_Pa)}`,
-          source: STRESS_SOURCES.rankine,
-        };
-  const R = check.basis.kind === 'ductile' ? 'R_e' : 'R_m';
-  const sym = check.criterion === 'vonMises' ? '\\sigma_{eq}' : '\\sigma_1';
-  f.n = {
-    latex: `n = \\dfrac{${R}}{${sym}}`,
-    application: `= \\dfrac{${MPa(check.strength_Pa)}}{${MPa(check.equivalent_Pa)}} = ${Number.isFinite(check.safetyFactor) ? tex(check.safetyFactor) : '\\infty'}`,
-    source: STRESS_SOURCES.safety,
-  };
+  f.equivalent = equivalentFormula(check);
+  f.n = safetyFormula(check);
   if (deflection) {
     const { result, length_m, limit } = deflection;
     f.deflection = {
