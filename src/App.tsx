@@ -1,9 +1,16 @@
-import { BeamsPage } from '@ui/beams/BeamsPage';
+import { lazy, Suspense } from 'react';
 import { Disclaimer } from '@ui/components/Disclaimer';
 import { HomePage } from '@ui/HomePage';
-import { MaterialsPage } from '@ui/materials/MaterialsPage';
-import { SectionsPage } from '@ui/sections/SectionsPage';
 import { useHashRoute } from '@ui/useHashRoute';
+
+// Pages chargées à la demande : le paquet initial reste léger (l'accueil s'affiche vite).
+const MaterialsPage = lazy(() =>
+  import('@ui/materials/MaterialsPage').then((m) => ({ default: m.MaterialsPage })),
+);
+const SectionsPage = lazy(() =>
+  import('@ui/sections/SectionsPage').then((m) => ({ default: m.SectionsPage })),
+);
+const BeamsPage = lazy(() => import('@ui/beams/BeamsPage').then((m) => ({ default: m.BeamsPage })));
 
 const NAV = [
   { route: '', label: 'Accueil' },
@@ -61,7 +68,9 @@ export default function App() {
       </header>
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
-        <Page route={route} />
+        <Suspense fallback={<p className="text-sm text-slate-500">Chargement…</p>}>
+          <Page route={route} />
+        </Suspense>
       </main>
 
       <footer className="sticky bottom-0">
