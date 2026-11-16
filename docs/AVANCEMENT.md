@@ -18,9 +18,10 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 | 3bis. Catalogue de profilés (IPE, HEA, HEB, UPN, L) | ⏳ à faire | —                                                                                                                                                           |
 | 4. Poutres (isostatiques et hyperstatiques)         | ✅         | Appuis et encastrements en nombre libre ; forces, couples, charges réparties linéaires, poids propre ; réactions, V, M, rotation, flèche ; diagrammes SVG   |
 | 5. Contraintes et critères                          | ✅         | Moteur (Navier, flexion composée et déviée, τ moyen, torsion par forme, von Mises, Tresca, σ₁) ; vérification dans la page Poutres ; page Contraintes       |
-| 6 à 8                                               | ⏳ à faire | Flambement, partage par URL et export PDF, modules complémentaires                                                                                          |
+| 6. Flambement                                       | ✅         | Euler et Johnson, longueurs de flambement usuelles ou K libre, deux plans (y/z ou u/v pour la cornière), coefficient de sécurité Ncr/N                      |
+| 7 et 8                                              | ⏳ à faire | Partage par URL et export PDF, modules complémentaires                                                                                                      |
 
-**Qualité :** 479 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
+**Qualité :** 505 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
 
 ### Pages de l'application
 
@@ -35,6 +36,7 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
   - **Vérification (étape 5b) :** contraintes de traction et de compression maximales (fibre et abscisse), cisaillement moyen τ = V/Av, contrainte équivalente (von Mises pour un matériau ductile, contrainte principale de traction pour un matériau fragile), résistance du matériau, coefficient de sécurité avec pastille OK / Limite / KO (icône et mot, seuil réglable, 1,5 par défaut), flèche comparée à L/limite (300 par défaut). Formule, application numérique et source sous chaque ligne (bouton ƒ). Indisponible en saisie directe de I ou sans matériau, avec un message.
   - **Résultats :** réactions et couples d'encastrement, |V|max, |M|max, flèche maximale, L/δ, rotation maximale, avec leur abscisse. Diagrammes V, M et flèche (toutes charges cumulées) : au-dessus de chacun, la valeur au point survolé et le min et le max avec leur abscisse ; extremums marqués sur la courbe. Formule fermée (bouton ƒ) quand un cas de table est reconnu ; volet « Détail du calcul ».
 - **Contraintes (`#/contraintes`) :** schéma de la section cotée et conventions, section paramétrique et matériau, efforts N, My, Vz, T avec unités, seuil du coefficient de sécurité. Résultats : σN, traction et compression maximales (avec le point), τV, τT, τ retenu, von Mises, Tresca, σ₁, résistance et coefficient de sécurité avec pastille ; bouton ƒ sous chaque ligne ; remarques selon la forme (cornière, profil ouvert, matériau fragile) ; hypothèses et limites.
+- **Flambement (`#/flambement`) :** schéma des quatre cas usuels, section et matériau, longueur, appuis de chaque plan (K usuel ou libre), effort de compression. Résultats : élancement et charge critique par plan (Euler ou Johnson), élancement de transition, N/A, coefficient de sécurité avec pastille, bouton ƒ, remarques et hypothèses.
 
 ---
 
@@ -48,6 +50,7 @@ src/
     units.ts      conversions d'unités
     sections/     composite.ts (moteur à rectangles), shapes.ts (formes usuelles)
     beams/        model.ts (types, validation), solver.ts (Macaulay), analysis.ts (extremums, échantillons), sources.ts, selfWeight.ts
+    buckling/     buckling.ts (Euler, Johnson, longueurs de flambement, vérification dans deux plans)
     stress/       stress.ts (Navier, τ, von Mises, Tresca, σ₁, n, verdict), beamCheck.ts (vérification d'une poutre), combined.ts (efforts combinés N, My, Vz, T)
   materials/      schéma Zod, données JSON, chargement, recherche, matériaux personnalisés
   ui/             composants React, un dossier par module (materials/, sections/)
@@ -251,6 +254,10 @@ STRESS_SOURCES · StressInputError
 - [ ] Torsion (`combined.ts`) : n° de tableau de Roark pour le rectangle plein (coefficients 0,6095 ; 0,8865 ; −1,8023 ; 0,9100) et les profils minces ouverts ; paragraphes de Bredt, de la torsion des arbres et de la flexion déviée.
 - [ ] Paragraphe de l'EN 1990 (annexe A1.4) pour les limites de flèche.
 
+**Flambement (`src/core/buckling/`)**
+
+- [ ] Paragraphes de Timoshenko & Gere (Theory of Elastic Stability) pour Euler et les longueurs de flambement ; édition et n° d’équation de Shigley pour la parabole de Johnson ; paragraphe de l’EN 1993-1-1 §6.3.1.2.
+
 **Poutres (`src/core/beams/`)**
 
 - [ ] Numéros de cas du tableau 8.1 de Roark (8ᵉ éd.) et de l'annexe de Gere & Goodno pour les formules fermées. Les valeurs ont été recoupées par le solveur (accord à 1e-9), pas avec les ouvrages.
@@ -261,7 +268,8 @@ STRESS_SOURCES · StressInputError
 - [ ] **Étape 3bis :** catalogue IPE, HEA, HEB, UPN et cornières, valeurs sourcées (ArcelorMittal, EN 10365) en `verified: false`.
 - [ ] **Poutres, suites possibles :** cas de charge pondérés (`combineSolutions`, ex. 1,35 G + 1,5 Q), expression de M(x) par tronçon, schéma affiché même en cas d'erreur.
 - [ ] **Poutres :** la flexion d’une cornière ignore Iyz (σ et flèche) ; la page Contraintes, elle, en tient compte. À aligner.
-- [ ] **Étapes 6 à 8 :** flambement d'Euler, partage par URL et export PDF, modules complémentaires.
+- [ ] **Étapes 7 et 8 :** partage par URL et export PDF, modules complémentaires.
+- [ ] **Flambement, suites possibles :** courbes de flambement de l’EN 1993-1-1 §6.3.1 (χ), flambement par torsion et flexion-torsion des profils ouverts, K recommandés pour encastrements imparfaits.
 - [ ] Éventuellement : tests de composants React (nécessite jsdom et Testing Library, à valider), centre de cisaillement, profilé I à semelles différentes.
 
 ---
@@ -292,3 +300,30 @@ STRESS_SOURCES · StressInputError
 - **Majorant** : σ_max et τ_max sont combinés même s'ils ne sont pas atteints à la même abscisse ni sur la même fibre. C'est conservatif.
 - **Section** : la vérification de contrainte demande une section paramétrique (zG, h, Av). En saisie directe de I, elle n'est pas proposée.
 - **Hors périmètre, signalé dans l'UI** : déversement, voilement local, fatigue, concentrations de contraintes, cisaillement de Jourawski (répartition réelle de τ).
+
+---
+
+## 6. Étape 6 terminée : flambement
+
+### Moteur (`core/buckling/`)
+
+- Lk = K·L ; i = √(I/A) ; λ = Lk/i ; Ncr d'Euler = π²EI/Lk².
+- Élancement de transition λc = π√(2E/Re) (tangence, σcr = Re/2). Sous λc : parabole de Johnson σcr = Re − (Re·λ/2π)²/E ; au-delà : Euler σcr = π²E/λ². Sans Re (fonte grise) : Euler seul, signalé.
+- Deux plans de flambement, chacun avec son K ; le plan de plus petit Ncr gouverne. n = Ncr,min / N (N > 0 en compression).
+
+### Décisions (confirmées par le responsable du projet le 16 novembre 2026)
+
+- **Modèle :** Euler + Johnson (pas de courbes EC3 pour l'instant).
+- **K :** valeurs théoriques 2 ; 1 ; 0,7 ; 0,5, plus un K saisi librement ; l'UI rappelle qu'un encastrement réel n'est jamais parfait.
+- **Plans :** deux plans avec K distincts. Pour une section sans axe de symétrie (cornière), les plans sont les axes principaux u et v (choix fait lors du développement, cohérent avec la mécanique).
+- **Seuil :** même seuil réglable que les contraintes (OK à partir de 1,5). Ncr est une charge de barre parfaite : l'UI signale l'effet des imperfections aux élancements intermédiaires.
+
+### Page (`#/flambement`)
+
+Schéma des quatre cas (déformées schématiques, cas retenus surlignés), section paramétrique et matériau (ou E saisi), longueur, appuis de chaque plan, effort N, seuil. Résultats : λ et Ncr par plan (modèle Euler ou Johnson), λc, N/A, n avec pastille ; bouton ƒ ; remarques (axes principaux, profil ouvert, matériau sans Re, élancement intermédiaire).
+
+### Limites
+
+- Barre parfaite : pas d'imperfection, d'excentricité ni de contrainte résiduelle (n surestimé aux élancements moyens par rapport à l'EN 1993-1-1).
+- Flambement par flexion seul : le flambement par torsion ou flexion-torsion (L, T, U) n'est pas calculé.
+- Section constante, effort normal constant, matériau homogène.

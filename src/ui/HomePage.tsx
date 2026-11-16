@@ -27,7 +27,11 @@ const MODULES: readonly ModuleEntry[] = [
     description: 'N, M, V, torsion — von Mises, Tresca, coefficient de sécurité',
     route: 'contraintes',
   },
-  { name: 'Flambement d’Euler', description: 'Longueurs de flambement usuelles' },
+  {
+    name: 'Flambement',
+    description: 'Euler et Johnson, longueurs de flambement usuelles, deux plans',
+    route: 'flambement',
+  },
 ];
 
 export function HomePage() {

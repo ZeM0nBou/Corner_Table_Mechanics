@@ -11,6 +11,9 @@ const SectionsPage = lazy(() =>
   import('@ui/sections/SectionsPage').then((m) => ({ default: m.SectionsPage })),
 );
 const BeamsPage = lazy(() => import('@ui/beams/BeamsPage').then((m) => ({ default: m.BeamsPage })));
+const BucklingPage = lazy(() =>
+  import('@ui/buckling/BucklingPage').then((m) => ({ default: m.BucklingPage })),
+);
 const StressPage = lazy(() =>
   import('@ui/stress/StressPage').then((m) => ({ default: m.StressPage })),
 );
@@ -21,6 +24,7 @@ const NAV = [
   { route: 'sections', label: 'Sections' },
   { route: 'poutres', label: 'Poutres' },
   { route: 'contraintes', label: 'Contraintes' },
+  { route: 'flambement', label: 'Flambement' },
 ] as const;
 
 function Page({ route }: { route: string }) {
@@ -33,6 +37,8 @@ function Page({ route }: { route: string }) {
       return <BeamsPage />;
     case 'contraintes':
       return <StressPage />;
+    case 'flambement':
+      return <BucklingPage />;
     default:
       return <HomePage />;
   }
