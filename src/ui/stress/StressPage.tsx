@@ -23,6 +23,8 @@ import { buildSectionInput, defaultDims, shapeSpec } from '@ui/sections/sectionF
 import { SectionDrawing } from '@ui/sections/SectionDrawing';
 import { SectionShapeFields, type Dims } from '@ui/sections/SectionShapeFields';
 import { fromSharedSection, toSharedSection } from '@ui/sections/sectionShare';
+import type { SectionEfforts } from '@core/stress';
+import { EffortsDrawing } from './EffortsDrawing';
 import { evaluateStress, type StressEvaluation } from './stressModel';
 
 const DEFAULT_MATERIAL = REFERENCE_MATERIALS.find((m) => m.id === 's235jr')?.id ?? '';
@@ -33,6 +35,14 @@ type Efforts = Record<EffortKey, number | undefined>;
 
 /** Exemple par défaut : flexion composée avec un peu de torsion. */
 const DEFAULT_EFFORTS: Efforts = { N_N: 20_000, My_Nm: 10_000, Vz_N: 15_000, T_Nm: 200 };
+
+/** Un champ vide compte pour zéro. */
+const zeroIfEmpty = (e: Efforts): SectionEfforts => ({
+  N_N: e.N_N ?? 0,
+  My_Nm: e.My_Nm ?? 0,
+  Vz_N: e.Vz_N ?? 0,
+  T_Nm: e.T_Nm ?? 0,
+});
 
 const ASSUMPTIONS = [
   'Petites déformations, matériau élastique linéaire homogène isotrope.',
@@ -175,6 +185,13 @@ function Convention() {
         Poutres) ; <i>Vz</i> effort tranchant vertical ; <i>T</i> moment de torsion autour de{' '}
         <i>x</i>. Seules les valeurs absolues de <i>Vz</i> et <i>T</i> comptent.
       </li>
+      <li>
+        Schéma des efforts : coupe de normale +<i>x</i> de la partie gauche, avec les actions de la
+        partie droite. <i>N</i> &gt; 0 sort de la coupe ; <i>My</i> &gt; 0 a son vecteur selon −
+        <i>y</i> ; <i>Vz</i> &gt; 0 est dessiné vers le bas (comme la page Poutres, où <i>V</i> est
+        la somme des forces vers le haut à gauche de la coupe) ; <i>T</i> &gt; 0 a son vecteur selon
+        +<i>x</i>.
+      </li>
       <li>σ &gt; 0 en traction, &lt; 0 en compression.</li>
     </ul>
   );
@@ -218,12 +235,7 @@ export function StressPage({ link }: { link: LinkLoad<'contraintes'> }) {
       ? evaluateStress({
           sectionInput,
           section,
-          efforts: {
-            N_N: efforts.N_N ?? 0,
-            My_Nm: efforts.My_Nm ?? 0,
-            Vz_N: efforts.Vz_N ?? 0,
-            T_Nm: efforts.T_Nm ?? 0,
-          },
+          efforts: zeroIfEmpty(efforts),
           material,
           threshold,
         })
@@ -255,17 +267,29 @@ export function StressPage({ link }: { link: LinkLoad<'contraintes'> }) {
       <LinkNotice link={link} linked={mat.linked} />
 
       <section
-        className="grid gap-4 rounded-lg border border-slate-200 bg-white p-3 md:grid-cols-[minmax(0,16rem)_1fr]"
+        className="grid gap-4 rounded-lg border border-slate-200 bg-white p-3 md:grid-cols-2"
         aria-label="Schéma du cas"
       >
-        <div className="mx-auto w-full max-w-xs">
-          {section ? (
-            <SectionDrawing section={section} shape={shape} dims={numericDims} />
-          ) : (
-            <p className="p-4 text-sm text-slate-500">Schéma indisponible : section incohérente.</p>
-          )}
+        {section ? (
+          <>
+            <figure className="mx-auto w-full max-w-xs">
+              <SectionDrawing section={section} shape={shape} dims={numericDims} />
+            </figure>
+            <figure className="mx-auto w-full max-w-xs">
+              <EffortsDrawing section={section} efforts={zeroIfEmpty(efforts)} />
+              <figcaption className="mt-1 text-center text-xs text-slate-500">
+                Efforts sur la coupe (flèches non à l’échelle)
+              </figcaption>
+            </figure>
+          </>
+        ) : (
+          <p className="p-4 text-sm text-slate-500 md:col-span-2">
+            Schéma indisponible : section incohérente.
+          </p>
+        )}
+        <div className="md:col-span-2">
+          <Convention />
         </div>
-        <Convention />
       </section>
 
       <section className="space-y-4 rounded-lg border border-slate-200 bg-white p-4">

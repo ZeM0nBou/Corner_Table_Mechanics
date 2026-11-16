@@ -22,7 +22,7 @@ Application en ligne : https://zem0nbou.github.io/Corner_Table_Mechanics/
 | 7. Partage + export PDF                             | ✅         | Lien compressé dans l’ancre (Sections, Poutres, Contraintes, Flambement), matériau inclus ; export PDF par l’impression, formules dépliées                  |
 | 8. Modules complémentaires                          | ⏳ à faire | —                                                                                                                                                           |
 
-**Qualité :** 596 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
+**Qualité :** 607 tests Vitest, lint et vérification des types sans erreur. La CI bloque le déploiement si un test échoue.
 
 ### Pages de l'application
 
@@ -371,3 +371,12 @@ Schéma des quatre cas (déformées schématiques, cas retenus surlignés), sect
 - Impression par Ctrl+P : seules les formules déjà dépliées sont imprimées (le bouton « Exporter » déplie tout) ; l'en-tête a la date mais pas le lien.
 - Page Matériaux non partageable par lien.
 - Un lien de matériau temporaire repartagé l'est comme matériau personnalisé.
+
+---
+
+## 7 bis. Retouches d'interface (16 novembre 2026, à valider)
+
+- **Page Contraintes, schéma des efforts** (`EffortsDrawing.tsx`, géométrie pure dans `effortsDiagram.ts`) : tronçon de barre en perspective cavalière, coupe vue de face, flèches N et Vz, flèches courbes My et T dans leur sens réel (non à l'échelle, valeurs affichées). Choix du responsable : les efforts (N, My, Vz, T), pas la répartition des contraintes.
+  - Facette dessinée : normale +x de la partie gauche, actions de la partie droite. N > 0 selon +x ; My > 0 : vecteur selon −y (∫σ·z dA = −My, cohérent avec `normalStress_Pa`) ; Vz > 0 vers le bas (convention de la page Poutres : V = somme des forces vers le haut à gauche de la coupe) ; T > 0 : vecteur selon +x. Le calcul n'utilise que |Vz| et |T|.
+  - 11 tests : sens des flèches selon les signes, efforts nuls ou non finis non dessinés, résultante ∫σ·z dA du moteur égale au moment dessiné, base de rotation directe, projection.
+- **Onglets sur téléphone :** la barre de navigation défile horizontalement (fondu sur les bords) au lieu d'élargir la page ; l'onglet actif est ramené dans la zone visible. Contrôlé à 375 px de large : largeur de page = largeur d'écran.
