@@ -3,6 +3,7 @@ import { ShareLinkError } from '@share/codec';
 import type { SharedPage, SharedStateInput } from '@share/schemas';
 import { encodeShare, shareUrl } from '@share/share';
 import { Button } from '@ui/components/Button';
+import { usePrint } from '@ui/print/printContext';
 
 type Status =
   | { kind: 'idle' }
@@ -31,10 +32,14 @@ export function ShareBar<P extends SharedPage>({ page, getState }: ShareBarProps
     return () => window.clearTimeout(timer);
   }, [status]);
 
+  const { exportPdf } = usePrint();
+  const linkOfState = async () =>
+    shareUrl(window.location.href, page, await encodeShare(page, getState()));
+
   const copy = async () => {
     let url: string;
     try {
-      url = shareUrl(window.location.href, page, await encodeShare(page, getState()));
+      url = await linkOfState();
     } catch (e) {
       setStatus({
         kind: 'error',
@@ -55,6 +60,12 @@ export function ShareBar<P extends SharedPage>({ page, getState }: ShareBarProps
       <div className="flex flex-wrap justify-end gap-2">
         <Button onClick={() => void copy()} title="Copier un lien qui rouvre ce calcul">
           Copier le lien
+        </Button>
+        <Button
+          onClick={() => void exportPdf(linkOfState)}
+          title="Imprimer ou enregistrer en PDF, toutes les formules dépliées"
+        >
+          Exporter (PDF)
         </Button>
       </div>
       <p aria-live="polite" className="text-xs text-slate-600">

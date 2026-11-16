@@ -36,6 +36,7 @@ import { MaterialDropdown } from '@ui/materials/MaterialDropdown';
 import { LinkNotice } from '@ui/share/LinkNotice';
 import { ShareBar } from '@ui/share/ShareBar';
 import type { LinkLoad } from '@ui/share/SharedPageLoader';
+import { usePrint } from '@ui/print/printContext';
 import { usePageMaterial } from '@ui/share/usePageMaterial';
 import { buildSectionInput, defaultDims, shapeSpec } from '@ui/sections/sectionForm';
 import { SectionShapeFields, type Dims } from '@ui/sections/SectionShapeFields';
@@ -272,8 +273,12 @@ function Results({
 }
 
 function Method() {
+  const { expandAll } = usePrint();
   return (
-    <details className="rounded-lg border border-slate-200 bg-white p-4">
+    <details
+      open={expandAll ? true : undefined}
+      className="rounded-lg border border-slate-200 bg-white p-4"
+    >
       <summary className="cursor-pointer font-medium">
         Détail du calcul : méthode et hypothèses
       </summary>

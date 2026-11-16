@@ -56,7 +56,7 @@ export function MaterialDropdown({
           aria-expanded={open}
           aria-controls={panelId}
           onClick={() => setOpen((o) => !o)}
-          className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-left text-sm hover:bg-slate-50"
+          className="print-keep flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-left text-sm hover:bg-slate-50"
         >
           <span className={`truncate ${selected ? '' : 'text-slate-500'}`}>
             {selected

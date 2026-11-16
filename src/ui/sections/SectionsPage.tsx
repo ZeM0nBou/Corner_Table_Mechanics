@@ -15,6 +15,7 @@ import { MaterialDropdown } from '@ui/materials/MaterialDropdown';
 import { LinkNotice } from '@ui/share/LinkNotice';
 import { ShareBar } from '@ui/share/ShareBar';
 import type { LinkLoad } from '@ui/share/SharedPageLoader';
+import { usePrint } from '@ui/print/printContext';
 import { usePageMaterial } from '@ui/share/usePageMaterial';
 import { SectionDrawing } from './SectionDrawing';
 import { buildSectionInput, defaultDims, SHAPES, shapeSpec } from './sectionForm';
@@ -164,6 +165,7 @@ function Results({
   assumptions: readonly string[];
 }) {
   const [shown, setShown] = useState<ReadonlySet<ResultKey>>(new Set());
+  const { expandAll } = usePrint();
   const withFormula = rows.filter((r) => formulas[r.key] !== undefined).map((r) => r.key);
   const toggle = (k: ResultKey) =>
     setShown((prev) => {
@@ -206,14 +208,14 @@ function Results({
           </button>
         </div>
       </div>
-      <p className="mb-2 text-xs text-slate-500">
+      <p className="no-print mb-2 text-xs text-slate-500">
         Cliquez sur ƒ pour afficher la formule d’une ligne. Applications numériques en mm.
       </p>
       <table className="w-full">
         <tbody>
           {rows.map((r) => {
             const f = formulas[r.key];
-            const open = f !== undefined && shown.has(r.key);
+            const open = f !== undefined && (expandAll || shown.has(r.key));
             return (
               <Fragment key={r.key}>
                 <tr className={open ? '' : 'border-b border-slate-100'}>

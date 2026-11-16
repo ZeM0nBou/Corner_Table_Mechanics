@@ -1,17 +1,61 @@
 @import 'tailwindcss';
 
-/* Impression (export PDF) : feuille minimale, enrichie à l'étape 7. */
+/*
+ * Impression (export PDF par le navigateur, étape 7c).
+ * Le bouton « Exporter (PDF) » déplie aussi toutes les formules et le détail du calcul ;
+ * un en-tête imprimé (PrintHeader) donne la page, la date, l'avertissement et le lien.
+ */
 @media print {
   @page {
-    margin: 15mm;
+    size: A4;
+    margin: 12mm;
   }
 
   body {
     background: white;
     color: black;
+    /* Garder les couleurs utiles : pastilles OK / KO, aires des diagrammes, charges. */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .no-print {
     display: none !important;
+  }
+
+  /*
+   * Boutons d'action masqués (ajouter, supprimer, ƒ, ⓘ…). Restent visibles : l'option
+   * choisie d'un groupe (forme de section) et le sélecteur de matériau, qui montre
+   * le matériau retenu (classe print-keep).
+   */
+  button:not([aria-checked='true']):not(.print-keep) {
+    display: none !important;
+  }
+
+  /*
+   * Petits blocs non coupés entre deux pages (les sections entières le peuvent :
+   * les garder d'un bloc laisserait des pages à moitié vides).
+   */
+  figure,
+  svg,
+  tr,
+  li {
+    break-inside: avoid;
+  }
+
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  /* Champs de saisie : valeur lisible, sans ombre ni fond. */
+  input,
+  select {
+    box-shadow: none !important;
+    background: white !important;
+  }
+
+  details > summary {
+    list-style: none;
   }
 }

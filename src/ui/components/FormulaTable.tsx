@@ -1,4 +1,5 @@
 import { Fragment, useState, type ReactNode } from 'react';
+import { usePrint } from '@ui/print/printContext';
 import { Tex } from './Tex';
 
 /** Formule d'un résultat : expression, application numérique et source (LaTeX). */
@@ -24,6 +25,7 @@ export interface FormulaRow {
  */
 export function FormulaTable({ rows }: { rows: readonly FormulaRow[] }) {
   const [shown, setShown] = useState<ReadonlySet<string>>(new Set());
+  const { expandAll } = usePrint();
   const toggle = (k: string) =>
     setShown((prev) => {
       const next = new Set(prev);
@@ -37,7 +39,7 @@ export function FormulaTable({ rows }: { rows: readonly FormulaRow[] }) {
       <tbody>
         {rows.map((r) => {
           const f = r.formula;
-          const open = f !== undefined && shown.has(r.key);
+          const open = f !== undefined && (expandAll || shown.has(r.key));
           return (
             <Fragment key={r.key}>
               <tr className={open ? '' : 'border-b border-slate-100'}>
