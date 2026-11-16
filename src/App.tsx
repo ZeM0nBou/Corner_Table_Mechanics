@@ -29,6 +29,16 @@ const NAV = [
   { route: 'flambement', label: 'Flambement' },
 ] as const;
 
+/** Ramène l'onglet actif dans la partie visible de la barre (défilement horizontal seul). */
+function scrollIntoViewRef(el: HTMLAnchorElement | null) {
+  const nav = el?.parentElement;
+  if (!el || !nav || nav.scrollWidth <= nav.clientWidth) return;
+  const left = el.offsetLeft - nav.offsetLeft;
+  if (left < nav.scrollLeft || left + el.offsetWidth > nav.scrollLeft + nav.clientWidth) {
+    nav.scrollTo({ left: left - (nav.clientWidth - el.offsetWidth) / 2 });
+  }
+}
+
 /**
  * Page de la route. Les pages de calcul lisent d'abord le lien partagé éventuel
  * (`#/poutres?c=…`) ; la clé remonte la page quand le lien change.
@@ -83,15 +93,23 @@ export default function App() {
                 Pré-dimensionnement en résistance des matériaux, directement dans le navigateur.
               </p>
             </div>
-            <nav aria-label="Navigation principale" className="no-print flex gap-1">
+            {/*
+              Sur un écran étroit, les onglets défilent horizontalement dans la barre au lieu
+              d'élargir la page ; l'onglet actif est ramené dans la zone visible.
+            */}
+            <nav
+              aria-label="Navigation principale"
+              className="no-print -mx-4 flex max-w-[calc(100%+2rem)] min-w-0 gap-1 overflow-x-auto px-4 pb-1 [scrollbar-width:thin] [mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)] sm:[mask-image:none] sm:mx-0 sm:max-w-full sm:px-0"
+            >
               {NAV.map((item) => {
                 const active = route === item.route;
                 return (
                   <a
                     key={item.route}
+                    ref={active ? scrollIntoViewRef : undefined}
                     href={`#/${item.route}`}
                     aria-current={active ? 'page' : undefined}
-                    className={`rounded-md px-3 py-1.5 text-sm ${
+                    className={`shrink-0 rounded-md px-3 py-1.5 text-sm whitespace-nowrap ${
                       active ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
