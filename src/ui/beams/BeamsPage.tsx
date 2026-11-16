@@ -14,6 +14,7 @@ import {
   type BeamSample,
   type BeamSolution,
   type BeamStaticity,
+  type Range,
 } from '@core/beams';
 import {
   computeSection,
@@ -115,6 +116,12 @@ function compute(
 
 /** Ramène à zéro une valeur inférieure au bruit d'arrondi (1e-9 de l'ordre de grandeur). */
 const snap = (v: number, ref: number) => (Math.abs(v) <= 1e-9 * ref ? 0 : v);
+
+/** Extremums ramenés à zéro sous le bruit d'arrondi. */
+const snapRange = (r: Range, ref: number): Range => ({
+  min: { ...r.min, value: snap(r.min.value, ref) },
+  max: { ...r.max, value: snap(r.max.value, ref) },
+});
 
 function staticityLabel(s: BeamStaticity): string {
   return s.kind === 'isostatique'
@@ -1040,6 +1047,7 @@ export function BeamsPage() {
               defaultUnit="kN"
               points={curve((s) => s.V_N, refF)}
               valueAt={(x) => snap(shear_N(result.solution, x), refF)}
+              extremes={snapRange(result.extrema.shear_N, refF)}
               length_m={L}
               lengthUnit={lengthUnit}
               note="somme des forces vers le haut à gauche de la coupe"
@@ -1051,11 +1059,12 @@ export function BeamsPage() {
               defaultUnit="kN·m"
               points={curve((s) => s.M_Nm, refF * L)}
               valueAt={(x) => snap(moment_Nm(result.solution, x), refF * L)}
+              extremes={snapRange(result.extrema.moment_Nm, refF * L)}
               length_m={L}
               lengthUnit={lengthUnit}
               note="positif : fibre inférieure tendue"
             />
-            {EI !== undefined && (
+            {EI !== undefined && result.extrema.deflection_m && (
               <BeamDiagram
                 title="Flèche"
                 symbol="w"
@@ -1063,6 +1072,7 @@ export function BeamsPage() {
                 defaultUnit="mm"
                 points={curve((s) => s.w_m, (refF * L ** 3) / EI)}
                 valueAt={(x) => snap(deflection_m(result.solution, x), (refF * L ** 3) / EI)}
+                extremes={snapRange(result.extrema.deflection_m, (refF * L ** 3) / EI)}
                 length_m={L}
                 lengthUnit={lengthUnit}
                 note="positive vers le haut"

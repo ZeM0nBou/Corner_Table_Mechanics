@@ -1,4 +1,5 @@
 import { useRef, useState, type PointerEvent } from 'react';
+import type { Range } from '@core/beams';
 import { fromSI, type Quantity, type UnitOf } from '@core/units';
 import { UnitSelect } from '@ui/components/UnitSelect';
 import { formatNumber } from '@ui/format';
@@ -30,11 +31,15 @@ interface BeamDiagramProps<Q extends Quantity> {
   lengthUnit: UnitOf<'length'>;
   /** Précision sur le sens positif, affichée sous le titre. */
   note?: string;
+  /** Minimum et maximum exacts (SI) et leur abscisse, affichés au-dessus et marqués sur la courbe. */
+  extremes: Range;
 }
 
 /**
  * Diagramme d'une grandeur le long de la poutre (SVG, sans bibliothèque) : une seule
- * série, aire remplie jusqu'à zéro, réticule et valeur exacte au survol ou au toucher.
+ * série, aire remplie jusqu'à zéro, réticule au survol ou au toucher. Au-dessus du tracé :
+ * la valeur exacte au point survolé, et le minimum et le maximum avec leur abscisse
+ * (aussi marqués sur la courbe).
  */
 export function BeamDiagram<Q extends Quantity>({
   title,
@@ -46,6 +51,7 @@ export function BeamDiagram<Q extends Quantity>({
   length_m,
   lengthUnit,
   note,
+  extremes,
 }: BeamDiagramProps<Q>) {
   const [unit, setUnit] = useState<UnitOf<Q>>(defaultUnit);
   const [hover_m, setHover] = useState<number | null>(null);
@@ -74,7 +80,18 @@ export function BeamDiagram<Q extends Quantity>({
 
   const hoverValue = hover_m === null ? null : toY(valueAt(hover_m));
   const hoverX = hover_m === null ? 0 : sx(hover_m);
-  const readoutLeft = hoverX > (LEFT + W - RIGHT) / 2;
+  const fx = (x_m: number) => `${formatNumber(toX(x_m))} ${lengthUnit}`;
+  const fy = (v: number) => `${formatNumber(toY(v))} ${unit}`;
+
+  // Repères des extremums non nuls ; un seul si min et max coïncident.
+  const marks = [
+    { kind: 'max' as const, e: extremes.max },
+    { kind: 'min' as const, e: extremes.min },
+  ].filter(
+    (m, i, all) =>
+      m.e.value !== 0 &&
+      !(i === 1 && all[0] && all[0].e.value === m.e.value && all[0].e.x_m === m.e.x_m),
+  );
 
   return (
     <figure className="rounded-lg border border-slate-200 bg-white p-3">
@@ -90,6 +107,32 @@ export function BeamDiagram<Q extends Quantity>({
           label={`Unité de ${symbol}`}
         />
       </figcaption>
+      <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 text-xs">
+        <span className="text-slate-700" aria-live="polite">
+          {hover_m !== null && hoverValue !== null ? (
+            <>
+              x = <span className="font-mono tabular-nums">{fx(hover_m)}</span> →{' '}
+              <i className="font-serif">{symbol}</i> ={' '}
+              <span className="font-mono font-semibold tabular-nums">
+                {formatNumber(hoverValue)} {unit}
+              </span>
+            </>
+          ) : (
+            <span className="text-slate-400">Survolez la courbe pour lire une valeur.</span>
+          )}
+        </span>
+        <span className="text-slate-700">
+          max ={' '}
+          <span className="font-mono font-semibold tabular-nums">{fy(extremes.max.value)}</span>{' '}
+          <span className="text-slate-500">(x = {fx(extremes.max.x_m)})</span>
+          <span className="mx-1.5 text-slate-300">|</span>
+          min ={' '}
+          <span className="font-mono font-semibold tabular-nums">
+            {fy(extremes.min.value)}
+          </span>{' '}
+          <span className="text-slate-500">(x = {fx(extremes.min.x_m)})</span>
+        </span>
+      </div>
       <svg
         ref={svg}
         viewBox={`0 0 ${W} ${H}`}
@@ -146,6 +189,45 @@ export function BeamDiagram<Q extends Quantity>({
           strokeLinejoin="round"
         />
 
+        {marks.map(({ kind, e }) => {
+          const cx = sx(e.x_m);
+          const cy = sy(toY(e.value));
+          const above = kind === 'max' ? e.value >= 0 : e.value > 0;
+          // Étiquette au-dessus (ou au-dessous) du repère ; sur le côté s'il n'y a pas la place.
+          const vy = above ? cy - 8 : cy + 16;
+          const fits = vy >= TOP + 10 && vy <= H - BOTTOM - 4;
+          const toLeft = cx > W - RIGHT - 60;
+          const tx = fits ? cx : cx + (toLeft ? -8 : 8);
+          const ty = fits ? vy : cy + 4;
+          const anchor = fits
+            ? cx < LEFT + 40
+              ? 'start'
+              : cx > W - RIGHT - 40
+                ? 'end'
+                : 'middle'
+            : toLeft
+              ? 'end'
+              : 'start';
+          return (
+            <g key={kind} pointerEvents="none">
+              <circle cx={cx} cy={cy} r={3.5} fill="white" stroke={SERIES} strokeWidth={2} />
+              <text
+                x={tx}
+                y={ty}
+                fontSize={11}
+                fontWeight={600}
+                fill={INK}
+                textAnchor={anchor}
+                stroke="white"
+                strokeWidth={3}
+                paintOrder="stroke"
+              >
+                {formatNumber(toY(e.value))}
+              </text>
+            </g>
+          );
+        })}
+
         {hover_m !== null && hoverValue !== null && (
           <g pointerEvents="none">
             <line
@@ -165,19 +247,6 @@ export function BeamDiagram<Q extends Quantity>({
               stroke="white"
               strokeWidth={2}
             />
-            <text
-              x={hoverX + (readoutLeft ? -8 : 8)}
-              y={TOP + 10}
-              fontSize={12}
-              fill={INK}
-              textAnchor={readoutLeft ? 'end' : 'start'}
-              stroke="white"
-              strokeWidth={4}
-              paintOrder="stroke"
-            >
-              x = {formatNumber(toX(hover_m))} {lengthUnit} · {symbol} = {formatNumber(hoverValue)}{' '}
-              {unit}
-            </text>
           </g>
         )}
       </svg>
