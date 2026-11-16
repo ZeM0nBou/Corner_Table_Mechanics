@@ -13,3 +13,5 @@ export {
   type StrengthBasis,
   type StrengthCheck,
 } from './beamCheck';
+export { checkStrength } from './beamCheck';
+export * from './combined';

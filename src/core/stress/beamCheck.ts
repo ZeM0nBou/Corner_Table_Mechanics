@@ -145,7 +145,7 @@ export interface StrengthCheck {
 }
 
 /**
- * Vérification de résistance d'une poutre.
+ * Vérification de résistance à partir des contraintes extrêmes (section ou poutre).
  *
  * Formules :
  * - ductile : σ_eq = √(σ² + 3τ²) avec σ = max(σ_traction, |σ_compression|), n = Re/σ_eq ;
@@ -154,23 +154,27 @@ export interface StrengthCheck {
  * Hypothèses : majorant (σ_max et τ_max combinés même s'ils ne coïncident pas) ;
  * coefficient de sécurité brut, sans coefficient partiel.
  *
+ * @param tension_Pa plus grande contrainte de traction (≥ 0).
+ * @param compression_Pa plus grande contrainte de compression (≤ 0).
+ * @param tau_Pa contrainte de cisaillement retenue (≥ 0).
  * @param threshold seuil (≥ 1) au-delà duquel le coefficient de sécurité est « ok ».
  */
-export function checkBeamStrength(
-  stresses: BeamStresses,
+export function checkStrength(
+  tension_Pa: number,
+  compression_Pa: number,
+  tau_Pa: number,
   basis: StrengthBasis,
   threshold: number,
 ): StrengthCheck {
-  const tau = stresses.shear?.tau_Pa ?? 0;
   if (basis.kind === 'ductile') {
-    const sigma = Math.max(stresses.tension.sigma_Pa, -stresses.compression.sigma_Pa);
-    const eq = vonMises_Pa(sigma, tau);
+    const sigma = Math.max(tension_Pa, -compression_Pa);
+    const eq = vonMises_Pa(sigma, tau_Pa);
     const n = safetyFactor(basis.Re_Pa, eq);
     return {
       basis,
       criterion: 'vonMises',
       sigma_Pa: sigma,
-      tau_Pa: tau,
+      tau_Pa,
       equivalent_Pa: eq,
       strength_Pa: basis.Re_Pa,
       safetyFactor: n,
@@ -178,20 +182,37 @@ export function checkBeamStrength(
       compressionNotChecked: false,
     };
   }
-  const sigma = stresses.tension.sigma_Pa;
-  const eq = maxPrincipalStress_Pa(sigma, tau);
+  const eq = maxPrincipalStress_Pa(tension_Pa, tau_Pa);
   const n = safetyFactor(basis.Rm_Pa, eq);
   return {
     basis,
     criterion: 'rankine',
-    sigma_Pa: sigma,
-    tau_Pa: tau,
+    sigma_Pa: tension_Pa,
+    tau_Pa,
     equivalent_Pa: eq,
     strength_Pa: basis.Rm_Pa,
     safetyFactor: n,
     verdict: verdict(n, threshold),
     compressionNotChecked: true,
   };
+}
+
+/**
+ * Vérification de résistance d'une poutre : `checkStrength` appliquée aux contraintes
+ * extrêmes de `beamStresses` (τ = 0 si Av n'est pas définie).
+ */
+export function checkBeamStrength(
+  stresses: BeamStresses,
+  basis: StrengthBasis,
+  threshold: number,
+): StrengthCheck {
+  return checkStrength(
+    stresses.tension.sigma_Pa,
+    stresses.compression.sigma_Pa,
+    stresses.shear?.tau_Pa ?? 0,
+    basis,
+    threshold,
+  );
 }
 
 export interface DeflectionCheck {
